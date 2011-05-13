@@ -14,8 +14,9 @@ highly recommend. Ultimately I believe that an Rcpp
 plugin to Blitz++ was be very useful.
 
 The writting of this extension was motivated by 2 things:
-- fast multidimensional array operations available from R
-- a straightforward syntax for mutildimensional arrays
+
+ - fast multidimensional array operations available from R
+ - a straightforward syntax for mutildimensional arrays
 
 ### fast multimendional array operations
 
@@ -46,6 +47,17 @@ recommend checking the other tensor libraries for R or Matlab.
 
 Getting Started
 ---------------
+
+### Installation
+
+Just download the package in a folder and run the following command in the terminal:
+
+    R CMD INSTALL RcppSimpleTensor_0.2.tar.gz
+
+then in R you just need to include the library
+
+    library(RcppSimpleTensor)
+
 
 ### Dependencies
 
