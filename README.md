@@ -71,7 +71,22 @@ And that's all. Note however that to work, Rcpp will need the Cpp tool chain, bu
 
 ### A very simple example
 
-coming soon, sorry , I know this is the most important part!
+Here is a very studi example that just does a matrix multiplication
+
+    MULT = RcppSimpleTensor( R[i] ~ A[i,j] * B[j])
+
+    n = 100
+    A = array(rnorm(n^2),dim=c(n,n))
+    x = array(rnorm(n),  dim=c(n,1))
+    B1 = MULT(A,x)
+    B2 = A %*% x
+    dim(B2) <- c(n) # because it is 1xn but should be just n
+    sum(abs(B1 - B2))
+
+Note how the the `j` dimension is summed automatically because it does not appear
+on the left hand side.
+
+I promise I will give you more detailed example soon! 
 
 
 
