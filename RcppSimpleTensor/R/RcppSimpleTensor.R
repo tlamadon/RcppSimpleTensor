@@ -212,13 +212,6 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   }
 
   eval(parse(text=WRAPFUNC))
-
-  # save function to file for later use 
-  if (cache) {
-    fhash = digest(paste(expr,collapse=""))
-    filename =paste('.tmp.',fhash,'.rcpptensor',sep="")
-    save(tmpFunWrap,tmpfun,file=filename)
-  }
   
   return(tmpFunWrap)
 }
