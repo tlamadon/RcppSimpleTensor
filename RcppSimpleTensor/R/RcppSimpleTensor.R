@@ -101,14 +101,8 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
 
   # look if we already have this compiled localy
-  if (cache) {
-    fhash = digest(paste(expr,collapse=""))
-    filename =paste('.tmp.',fhash,'.rcpptensor',sep="")
-    if (file.exists(filename)) {
-      load(filename)
-      return(tmpFunWrap)
-    }
-  }
+  fhash = digest(paste(expr,collapse=""))
+  filename =paste('rcpptensor',fhash,sep="")
 
   # for testing
   # a = terms(R[i,j] ~ beta * B[i,k] * A[j,k])
@@ -190,7 +184,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
     cat(CODE)
   }
 
-  tmpfun <- cxxfunction(sig, CODE, plugin="Rcpp",includes="#include <math.h>",verbose=verbose)
+  tmpfun <- mycxxfunction(sig, CODE,plugin="Rcpp",file=filename,includes="#include <math.h>",verbose=verbose,cache=cache)
 
   # finally we wrap it into another function that will get the sizes 
   # automatically from the matrices
@@ -223,9 +217,9 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   if (cache) {
     fhash = digest(paste(expr,collapse=""))
     filename =paste('.tmp.',fhash,'.rcpptensor',sep="")
-    save(tmpFunWrap,file=filename)
+    save(tmpFunWrap,tmpfun,file=filename)
   }
-
+  
   return(tmpFunWrap)
 }
 
@@ -241,8 +235,153 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
 
 #}
 #registerPlugin( "omp", plug )
+mycxxfunction <- function (sig = character(), body = character(), plugin = "default", 
+    includes = "", settings = getPlugin(plugin), file= basename(tempfile()) , ..., verbose = FALSE , cache = FALSE) 
+{
+    #f <- basename(tempfile())
+    f = file
+    if (!is.list(sig)) {
+        sig <- list(sig)
+        names(sig) <- f
+        if (!length(body)) 
+            body <- ""
+        names(body) <- f
+    }
+    if (length(sig) != length(body)) 
+        stop("mismatch between the number of functions declared in 'sig' and the number of function bodies provided in 'body'")
+    signature <- lapply(sig, function(x) {
+        if (!length(x)) {
+            ""
+        }
+        else {
+            paste(sprintf("SEXP %s", names(x)), collapse = ", ")
+        }
+    })
+    decl <- lapply(1:length(sig), function(index) {
+        sprintf("SEXP %s( %s) ;", names(signature)[index], signature[[index]])
+    })
+    def <- lapply(1:length(sig), function(index) {
+        sprintf("\nSEXP %s( %s ){\n%s\n}\n", names(signature)[index], 
+            signature[[index]], if (is.null(settings$body)) 
+                body[[index]]
+            else settings$body(body[[index]]))
+    })
+    settings_includes <- if (is.null(settings$includes)) 
+        ""
+    else paste(settings$includes, collapse = "\n")
+    code <- sprintf("\n// includes from the plugin\n%s\n\n// user includes\n%s\n\n// declarations\nextern \"C\" {\n%s\n}\n\n// definition\n%s\n\n", 
+        settings_includes, paste(includes, collapse = "\n"), 
+        paste(decl, collapse = "\n"), paste(def, collapse = "\n"))
+    if (!is.null(env <- settings$env)) {
+        do.call(Sys.setenv, env)
+        if (isTRUE(verbose)) {
+            cat(" >> setting environment variables: \n")
+            writeLines(sprintf("%s = %s", names(env), env))
+        }
+    }
+    LinkingTo <- settings$LinkingTo
+    if (!is.null(LinkingTo)) {
+        paths <- .find.package(LinkingTo, quiet = TRUE)
+        if (length(paths)) {
+            flag <- paste(inline:::paste0("-I\"", paths, "/include\""), 
+                collapse = " ")
+            Sys.setenv(CLINK_CPPFLAGS = flag)
+            if (isTRUE(verbose)) {
+                cat(sprintf("\n >> LinkingTo : %s\n", paste(LinkingTo, 
+                  collapse = ", ")))
+                cat("CLINK_CPPFLAGS = ", flag, "\n\n")
+            }
+        }
+    }
+    if (isTRUE(verbose)) {
+        writeLines(" >> Program source :\n")
+        writeLines(addLineNumbers(code))
+    }
+    language <- "C++"
+    libLFile <- mycompileCode(f, code, language = language, verbose = verbose,dir  = paste(getwd(),'/.tensor/',sep=""),cache = cache)
+    cleanup <- function(env) {
+        if (f %in% names(getLoadedDLLs())) 
+            dyn.unload(libLFile)
+        unlink(libLFile)
+    }
+    reg.finalizer(environment(), cleanup, onexit = TRUE)
+    res <- vector("list", length(sig))
+    names(res) <- names(sig)
+    res <- new("CFuncList", res)
+    DLL <- dyn.load(libLFile)
+    for (i in seq_along(sig)) {
+        res[[i]] <- new("CFunc", code = code)
+        fn <- function(arg) {
+            NULL
+        }
+        args <- formals(fn)[rep(1, length(sig[[i]]))]
+        names(args) <- names(sig[[i]])
+        formals(fn) <- args
+        body <- quote(.Call(EXTERNALNAME, ARG))[c(1:2, rep(3, 
+            length(sig[[i]])))]
+        for (j in seq(along = sig[[i]])) body[[j + 2]] <- as.name(names(sig[[i]])[j])
+        body[[1L]] <- .Call
+        body[[2L]] <- getNativeSymbolInfo(names(sig)[[i]], DLL)$address
+        body(fn) <- body
+        res[[i]]@.Data <- fn
+    }
+    rm(j)
+    convention <- ".Call"
+    if (identical(length(sig), 1L)) 
+        res[[1L]]
+    else res
+}
 
+mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALSE) 
+{
+    wd = getwd()
+    on.exit(setwd(wd))
+    if (.Platform$OS.type == "windows") {
+        libCFile <- paste(dir, "/", f, ".EXT", sep = "")
+        libLFile <- paste(dir, "/", f, ".dll", sep = "")
+        libLFile2 <- paste(dir, "/", f, ".dll", sep = "")
+    }
+    else {
+        libCFile <- paste(dir, "/", f, ".EXT", sep = "")
+        libLFile <- paste(dir, "/", f, ".so", sep = "")
+        libLFile2 <- paste(dir, "/", f, ".sl", sep = "")
+    }
 
+    if (cache & file.exists(libLFile))
+      return(libLFile)
+
+    extension <- switch(language, `C++` = ".cpp", C = ".c", Fortran = ".f", 
+        F95 = ".f95", ObjectiveC = ".m", `ObjectiveC++` = ".mm")
+    libCFile <- sub(".EXT$", extension, libCFile)
+    write(code, libCFile)
+    if (file.exists(libLFile)) 
+        file.remove(libLFile)
+    if (file.exists(libLFile2)) 
+        file.remove(libLFile2)
+    setwd(dirname(libCFile))
+    errfile <- paste(basename(libCFile), ".err.txt", sep = "")
+    cmd <- paste(R.home(component = "bin"), "/R CMD SHLIB ", 
+        basename(libCFile), " 2> ", errfile, sep = "")
+    if (verbose) 
+        cat("Compilation argument:\n", cmd, "\n")
+    compiled <- system(cmd, intern = !verbose)
+    errmsg <- readLines(errfile)
+    unlink(errfile)
+    writeLines(errmsg)
+    setwd(wd)
+    if (!file.exists(libLFile) && file.exists(libLFile2)) 
+        libLFile <- libLFile2
+    if (!file.exists(libLFile)) {
+        cat("\nERROR(s) during compilation: source code errors or compiler configuration errors!\n")
+        cat("\nProgram source:\n")
+        code <- strsplit(code, "\n")
+        for (i in 1:length(code[[1]])) cat(format(i, width = 3), 
+            ": ", code[[1]][i], "\n", sep = "")
+        stop(paste("Compilation ERROR, function(s)/method(s) not created!", 
+            paste(errmsg, collapse = "\n")))
+    }
+    return(libLFile)
+}
 
 
 
