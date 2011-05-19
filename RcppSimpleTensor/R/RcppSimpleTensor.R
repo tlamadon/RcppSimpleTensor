@@ -295,20 +295,29 @@ mycxxfunction <- function (sig = character(), body = character(), plugin = "defa
     }
     if (isTRUE(verbose)) {
         writeLines(" >> Program source :\n")
-        writeLines(addLineNumbers(code))
+        writeLines(inline:::addLineNumbers(code))
     }
     language <- "C++"
     libLFile <- mycompileCode(f, code, language = language, verbose = verbose,dir  = paste(getwd(),'/.tensor/',sep=""),cache = cache)
-    cleanup <- function(env) {
-        if (f %in% names(getLoadedDLLs())) 
-            dyn.unload(libLFile)
-        unlink(libLFile)
-    }
-    reg.finalizer(environment(), cleanup, onexit = TRUE)
+    #cleanup <- function(env) {
+    #    if (f %in% names(getLoadedDLLs())) 
+    #        dyn.unload(libLFile)
+    #    unlink(libLFile)
+    #}
+    #reg.finalizer(environment(), cleanup, onexit = TRUE)
     res <- vector("list", length(sig))
     names(res) <- names(sig)
     res <- new("CFuncList", res)
-    DLL <- dyn.load(libLFile)
+
+    #load only if not loaded yet
+    dlllist = getLoadedDLLs()
+    if (f %in%  names(dlllist)) {
+      DLL <- dlllist[f]
+      DLL = DLL[[1]]
+    } else {
+      DLL <- dyn.load(libLFile)
+    }
+
     for (i in seq_along(sig)) {
         res[[i]] <- new("CFunc", code = code)
         fn <- function(arg) {
