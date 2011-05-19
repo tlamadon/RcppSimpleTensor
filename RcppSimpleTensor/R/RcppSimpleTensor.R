@@ -2,8 +2,9 @@
 # for simulating time series for example
 
 # I create a multidimensional array
-library(Rcpp)
-library(inline)
+require(Rcpp)
+require(inline)
+require(digest)
 
 
 # this function takes a term and 
@@ -97,7 +98,17 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 }
 
 # creates the c fucntion from expression
-RcppSimpleTensor <- function(expr,verbose=FALSE) {
+RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
+
+  # look if we already have this compiled localy
+  if (cache) {
+    fhash = digest(paste(expr,collapse=""))
+    filename =paste('.tmp.',fhash,'.rcpptensor',sep="")
+    if (file.exists(filename)) {
+      load(filename)
+      return(tmpFunWrap)
+    }
+  }
 
   # for testing
   # a = terms(R[i,j] ~ beta * B[i,k] * A[j,k])
@@ -175,7 +186,9 @@ RcppSimpleTensor <- function(expr,verbose=FALSE) {
   CODE = paste(CODE, RHS$E, ";\r\n" , sep="")
   CODE = paste(CODE,"}\r\n")
   CODE = paste(CODE,"return R;\r\n")
-  cat(CODE)
+  if (verbose) {
+    cat(CODE)
+  }
 
   tmpfun <- cxxfunction(sig, CODE, plugin="Rcpp",includes="#include <math.h>",verbose=verbose)
 
@@ -205,6 +218,13 @@ RcppSimpleTensor <- function(expr,verbose=FALSE) {
   }
 
   eval(parse(text=WRAPFUNC))
+
+  # save function to file for later use 
+  if (cache) {
+    fhash = digest(paste(expr,collapse=""))
+    filename =paste('.tmp.',fhash,'.rcpptensor',sep="")
+    save(tmpFunWrap,file=filename)
+  }
 
   return(tmpFunWrap)
 }
