@@ -298,6 +298,12 @@ mycxxfunction <- function (sig = character(), body = character(), plugin = "defa
         writeLines(inline:::addLineNumbers(code))
     }
     language <- "C++"
+
+    # if tensor folder not here, we create it
+    if (file.exists('.tensor')==FALSE){
+        dir.create('.tensor') 
+    }
+
     libLFile <- mycompileCode(f, code, language = language, verbose = verbose,dir  = paste(getwd(),'/.tensor/',sep=""),cache = cache)
     #cleanup <- function(env) {
     #    if (f %in% names(getLoadedDLLs())) 
