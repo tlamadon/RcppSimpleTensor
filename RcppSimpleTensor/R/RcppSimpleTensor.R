@@ -74,8 +74,9 @@ RcppSimpleTensorGetArgs <- function(a,r) {
     STR2 = r$E
 
     # compose the expression
-    if (op %in% c("+","-","/","*",">","<","<=",">="))
-      r$E  = paste( "(", STR1 ,")",op,"(",STR2,")",sep="");
+    if (op %in% c("+","-","/","*",">","<","<=",">=",'||','&&'))
+      r$E  = paste(STR1,op,STR2,sep=" ");
+      #r$E  = paste( "(", STR1 ,")",op,"(",STR2,")",sep="");
 
     if (op %in% c("max","min"))
       r$E  = paste( "f" , op, "(", STR1 ,",",STR2,")",sep="");
@@ -90,8 +91,12 @@ RcppSimpleTensorGetArgs <- function(a,r) {
     r = RcppSimpleTensorGetArgs( a[[2]],r)
    
     if (a[[1]] == 'I') {
-      r$E = paste("((", r$E , ")?1:0)",sep="")
-    } 
+      r$E = paste("((", r$E , ")?1.0:0.0)",sep="")
+    }
+
+    if (a[[1]] == '(') {
+      r$E = paste("(", r$E , ")",sep="")
+    }
     
     return(r)
   } 
@@ -176,8 +181,27 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   CODE = paste(CODE,'Rcpp::NumericVector R(', Rsize, ');' ,"\r\n", sep="")
   CODE = paste(CODE,srcloop)
   CODE = paste(CODE,"{\r\n")
-  CODE = paste(CODE, LHS$E , " = " , LHS$E,"+", sep="")
-  CODE = paste(CODE, RHS$E, ";\r\n" , sep="")
+  CODE = paste(CODE, LHS$E , " = " , LHS$E,"+ \\\r\n", sep="")
+  
+  # we need to break the line, let's do it every 60 charaters
+  # but we need to break on a blank space!
+  LINE_LENGTH= 60
+  LEFT_STR = strsplit(RHS$E," ")
+  lcount = 0
+  for (s in LEFT_STR[[1]]) {
+
+    if (lcount>LINE_LENGTH) {
+      CODE = paste(CODE, "\\\r\n" , sep="")
+      lcount =0
+    }
+
+    CODE = paste(CODE, s , sep="")
+    lcount = lcount + nchar(s)
+  }
+  CODE = paste(CODE, "; \r\n" , sep="")
+  
+  #CODE = paste(CODE, RHS$E, ";\r\n" , sep="")
+
   CODE = paste(CODE,"}\r\n")
   CODE = paste(CODE,"return R;\r\n")
   if (verbose) {
