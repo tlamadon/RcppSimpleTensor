@@ -32,11 +32,20 @@ RcppSimpleTensorGetArgs <- function(a,r) {
   if (length(a)>=3 & a[[1]] == '[') {
     
     tensorName = paste(a[[2]]) 
-
+   
     # running through the indices
     for (i in c((length(a)-2):1)){
+      at = a[[i+2]]
 
-      index  = paste(a[[i+2]])
+      # grab a simple lag
+      if (length(at)>1) {
+        indexlag = as.numeric(at[[3]])
+        index  = paste(at[[2]])      
+      } else {
+	indexlag=0
+        index  = paste(at)      
+      }
+
       indexn = paste(index,"_n",sep="")
       indexi = paste(index,"_i",sep="")
 
@@ -44,13 +53,20 @@ RcppSimpleTensorGetArgs <- function(a,r) {
       r$I = unique(c(r$I,index)) 
         
       # storing that this indices is this dimension for this tensor
-      r$D = rbind(r$D , data.frame(I=index, M=tensorName, dim = i))
+      r$D = rbind(r$D , data.frame(I=index, M=tensorName, dim = i, lag=indexlag))
+
+      # create lag string
+      if (indexlag>0) {
+        LAG_STR = paste('-',indexlag)
+      } else {
+	LAG_STR = ''
+      }
 
       # using the size and index, create the Cpp pointer with correct value
       if (i == (length(a)-2)) 
-        ind = indexi
+        ind = paste(indexi,LAG_STR)
       else
-        ind = paste( indexi , " + " , indexn , "*( ", ind ,")",sep="")
+        ind = paste( indexi ,LAG_STR, " + " , indexn , "*( ", ind ,")",sep="")
     }
 
     # finally we can append the tensor name in the front
@@ -140,6 +156,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   # Adding the matrices/tensors
   for (i in RHS$M) {
     varn = i 
+    if (varn == 'R') { next} #skip R
     sig  = c(sig , "numeric")
     sign = c(sign, paste(varn,"_",sep=""))
     src = paste(src , 'Rcpp::NumericVector ' , varn, '(' ,varn, '_);\r\n', sep="")
@@ -155,15 +172,21 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
  
   reduceSig = sig
   names(reduceSig) = sign;
+  varframe= RHS$D
+
+  print(varframe)
 
   # Adding indices and sizes
   for (i in c(indiceOut,indiceSum)) {
     varn = i
+    # get highest lag
+    lag = max(varframe$lag[varframe$I==varn])
+
     sig  = c(sig , "int")
     sign = c(sign, paste(varn,"_",sep=""))
     src = paste(src , 'int ' , varn , '_n = Rcpp::as<int> (', varn, '_);\r\n',sep="")
     src2 = paste(src2 , 'int ' , i , '_i;\r\n',sep="")
-    srcloop = paste(srcloop,'for (',i,'_i=0; ',i,'_i<',i,'_n; ',i,'_i++)\r\n',sep="")
+    srcloop = paste(srcloop,'for (',i,'_i=',lag,'; ',i,'_i<',i,'_n; ',i,'_i++)\r\n',sep="")
   }
 
   names(sig) = sign;
@@ -205,7 +228,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   CODE = paste(CODE,"}\r\n")
   CODE = paste(CODE,"return R;\r\n")
   if (verbose) {
-    cat(CODE)
+    #cat(CODE)
   }
 
   tmpfun <- mycxxfunction(sig, CODE,plugin="Rcpp",file=filename,includes="#include <math.h>",verbose=verbose,cache=cache)
