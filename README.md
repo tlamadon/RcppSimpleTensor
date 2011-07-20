@@ -88,6 +88,13 @@ on the left hand side.
 
 I promise I will give you more detailed example soon! 
 
+Future developments
+===================
 
+ - write an inline TI() function that will grab the variable from the local environement (this avoids the writing of an additional line before)
+ - add `openMP` of even `openCL` directives to the `C++` code to make it faster on multicore and GPU cards
+ - write better documentation
+ - allow for time series formula such as `Y[n] ~ Y[n-1] + E[n]`
+ - allow to use tensor within indexes such as `A[i] ~ B[ D[i] ]`
 
 
