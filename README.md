@@ -96,5 +96,6 @@ Future developments
  - write better documentation
  - allow for time series formula such as `Y[n] ~ Y[n-1] + E[n]`
  - allow to use tensor within indexes such as `A[i] ~ B[ D[i] ]`
+ - allow inverse redirections `A[D[i]] ~ B[i]`
 
 

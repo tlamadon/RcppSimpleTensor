@@ -6,6 +6,8 @@ require(Rcpp)
 require(inline)
 require(digest)
 
+# check out ?methods to overload $
+
 
 # this function takes a term and 
 # grabs informations about the tensor expression
@@ -438,5 +440,5 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
     return(libLFile)
 }
 
-
+#Sum <- function(expr,
 
