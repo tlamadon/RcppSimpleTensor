@@ -99,7 +99,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
     if (op %in% c("max","min"))
       r$E  = paste( "f" , op, "(", STR1 ,",",STR2,")",sep="");
 
-    if (op ==  '^')
+    if (op %in%  c('^','pow'))
       r$E  = paste( "pow(", STR1 ,",",STR2,")",sep="");
 
     return(r)
