@@ -161,7 +161,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
     if (varn == 'R') { next} #skip R
     sig  = c(sig , "numeric")
     sign = c(sign, paste(varn,"_",sep=""))
-    src = paste(src , 'Rcpp::NumericVector ' , varn, '(' ,varn, '_);\r\n', sep="")
+    src = paste(src , 'Rcpp::NumericVector ' , varn, '(' ,varn, '_);\n', sep="")
   }
 
   # Adding the scalars
@@ -169,7 +169,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
     varn = i
     sig  = c(sig , "double")
     sign = c(sign, paste(varn,"_",sep=""))
-    src = paste(src , 'double ' , varn , ' = Rcpp::as<double> (', varn, '_);\r\n',sep="")
+    src = paste(src , 'double ' , varn , ' = Rcpp::as<double> (', varn, '_);\n',sep="")
   }
  
   reduceSig = sig
@@ -186,9 +186,9 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
 
     sig  = c(sig , "int")
     sign = c(sign, paste(varn,"_",sep=""))
-    src = paste(src , 'int ' , varn , '_n = Rcpp::as<int> (', varn, '_);\r\n',sep="")
-    src2 = paste(src2 , 'int ' , i , '_i;\r\n',sep="")
-    srcloop = paste(srcloop,'for (',i,'_i=',lag,'; ',i,'_i<',i,'_n; ',i,'_i++)\r\n',sep="")
+    src = paste(src , 'int ' , varn , '_n = Rcpp::as<int> (', varn, '_);\n',sep="")
+    src2 = paste(src2 , 'int ' , i , '_i;\n',sep="")
+    srcloop = paste(srcloop,'for (',i,'_i=',lag,'; ',i,'_i<',i,'_n; ',i,'_i++)\n',sep="")
   }
 
   names(sig) = sign;
@@ -203,10 +203,10 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   # pasting all together!
   CODE = src;
   CODE = paste(CODE,src2)
-  CODE = paste(CODE,'Rcpp::NumericVector R(', Rsize, ');' ,"\r\n", sep="")
+  CODE = paste(CODE,'Rcpp::NumericVector R(', Rsize, ');' ,"\n", sep="")
   CODE = paste(CODE,srcloop)
-  CODE = paste(CODE,"{\r\n")
-  CODE = paste(CODE, LHS$E , " = " , LHS$E,"+ \\\r\n", sep="")
+  CODE = paste(CODE,"{\n")
+  CODE = paste(CODE, LHS$E , " = " , LHS$E,"+ \\\n", sep="")
   
   # we need to break the line, let's do it every 60 charaters
   # but we need to break on a blank space!
@@ -216,19 +216,19 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   for (s in LEFT_STR[[1]]) {
 
     if (lcount>LINE_LENGTH) {
-      CODE = paste(CODE, "\\\r\n" , sep="")
+      CODE = paste(CODE, "\\\n" , sep="")
       lcount =0
     }
 
     CODE = paste(CODE, s , sep="")
     lcount = lcount + nchar(s)
   }
-  CODE = paste(CODE, "; \r\n" , sep="")
+  CODE = paste(CODE, "; \n" , sep="")
   
-  #CODE = paste(CODE, RHS$E, ";\r\n" , sep="")
+  #CODE = paste(CODE, RHS$E, ";\n" , sep="")
 
-  CODE = paste(CODE,"}\r\n")
-  CODE = paste(CODE,"return R;\r\n")
+  CODE = paste(CODE,"}\n")
+  CODE = paste(CODE,"return R;\n")
   if (verbose) {
     #cat(CODE)
   }
