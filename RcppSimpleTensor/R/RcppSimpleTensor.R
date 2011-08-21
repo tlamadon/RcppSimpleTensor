@@ -1,4 +1,5 @@
 # TODO: add support for recursive formulations
+# 1) we compute the probability of PT/FT/U in each C/T at each time
 # for simulating time series for example
 
 # I create a multidimensional array
@@ -110,6 +111,10 @@ RcppSimpleTensorGetArgs <- function(a,r) {
    
     if (a[[1]] == 'I') {
       r$E = paste("((", r$E , ")?1.0:0.0)",sep="")
+    }
+
+    if (paste(a[[1]]) %in% c('abs','exp')) {
+      r$E = paste(a[[1]],"(", r$E , ")",sep="")
     }
 
     if (a[[1]] == '(') {
