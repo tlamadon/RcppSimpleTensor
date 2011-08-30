@@ -113,8 +113,12 @@ RcppSimpleTensorGetArgs <- function(a,r) {
       r$E = paste("((", r$E , ")?1.0:0.0)",sep="")
     }
 
-    if (paste(a[[1]]) %in% c('abs','exp')) {
+    if (paste(a[[1]]) %in% c('exp')) {
       r$E = paste(a[[1]],"(", r$E , ")",sep="")
+    }
+
+    if (paste(a[[1]]) %in% c('abs')) {
+      r$E = paste('f',a[[1]],"(", r$E , ")",sep="")
     }
 
     if (a[[1]] == '(') {
