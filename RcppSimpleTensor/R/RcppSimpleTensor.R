@@ -185,7 +185,9 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   names(reduceSig) = sign;
   varframe= RHS$D
 
-  print(varframe)
+  if (verbose) {
+    print(varframe)
+  }
 
   # Adding indices and sizes
   for (i in c(indiceOut,indiceSum)) {
