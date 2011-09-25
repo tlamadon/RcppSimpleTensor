@@ -106,6 +106,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
     return(r)
   }
 
+  # we found a unary operator
   if (length(a)==2) {
     r = RcppSimpleTensorGetArgs( a[[2]],r)
    
