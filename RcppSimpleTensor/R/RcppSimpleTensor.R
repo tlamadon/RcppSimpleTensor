@@ -1,6 +1,14 @@
 # TODO: add support for recursive formulations
-# 1) we compute the probability of PT/FT/U in each C/T at each time
 # for simulating time series for example
+
+# TODO: use of tensors inside formula (i,j)
+# TODO: return a scalar
+# TODO: use the shape of a tensor supplied as extra arguments for indexes
+# TODO: create inline tensor function
+# notation could be : 
+#   TI(expression ,  k+l|i+j       ) or
+#   TI(expression ,  shape=G[i,j,k])
+
 
 # I create a multidimensional array
 require(Rcpp)
@@ -17,13 +25,18 @@ require(digest)
 RcppSimpleTensorGetArgs <- function(a,r) {
 
   # if we find a scalar, we append it
+  # unless it's in i,j,k,l, in which case we replace it with i_i ot j_i
   if (length(a)==1) {
 
     # check if we have a scalar, ow it's just a number
-    if (! is.numeric(a))
-      r$S = unique(c(r$S,paste(a)));
-    
-    r$E = paste(a)
+    vv = paste(a)
+    if ( vv %in% c('i','j','k','l')) {
+      vv= paste(vv,'_i',sep='')
+    } else if (!is.numeric(a)) {
+      r$S = unique(c(r$S,paste(a)))
+    }
+
+    r$E = vv 
     return(r)
   } 
 
