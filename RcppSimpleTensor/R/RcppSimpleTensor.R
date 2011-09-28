@@ -131,6 +131,10 @@ RcppSimpleTensorGetArgs <- function(a,r) {
       r$E = paste(a[[1]],"(", r$E , ")",sep="")
     }
 
+    if (paste(a[[1]]) %in% c('sign')) {
+      r$E = paste("copysignf(1.0,", r$E , ")",sep="")
+    }
+
     if (paste(a[[1]]) %in% c('abs')) {
       r$E = paste('f',a[[1]],"(", r$E , ")",sep="")
     }
