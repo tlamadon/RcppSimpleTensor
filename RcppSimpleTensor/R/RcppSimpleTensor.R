@@ -148,7 +148,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 }
 
 # creates the c fucntion from expression
-RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
+RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
 
   # look if we already have this compiled localy
   fhash = digest(paste(expr,collapse=""))
@@ -158,7 +158,11 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
   # a = terms(R[i,j] ~ beta * B[i,k] * A[j,k])
   # a = terms(R[i,j] ~ I( beta > S[i,j]))
   # parse the expression usign terms
-  a = terms(expr)
+  if (is.character(expr)) {
+    a = terms(as.formula(expr))
+  } else {
+    a = terms(expr)
+  }
 
   if (a[[1]] != '~') {
     cat("the formula needs to be of the form R[...] ~ ...")
@@ -291,18 +295,18 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE) {
 
   eval(parse(text=WRAPFUNC))
   
-  return(tmpFunWrap)
+  if (struct) {
+    res = list()
+    res$inFunc = tmpfun
+    res$sig    = sig
+    res$wrapFunc = tmpFunWrap
+    res$RHS = RHS
+    return(res)
+  }else {
+    return(tmpFunWrap)
+  }
+
 }
-
-# myfun <- tensorFunc(R[i,j] ~ beta * B[i,j])
-# for (i in c(1:300)) {
-# R = myfun(A1,0.6)
-# }
-
-
-#plug<- function(){
-#  settings<- getPlugin( "Rcpp" )
-#  settings$env[["PKG_CPPFLAGS"]]<- " -O3 "
 
 #}
 #registerPlugin( "omp", plug )
@@ -470,4 +474,22 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 }
 
 #Sum <- function(expr,
+
+TI <- function(arga,argb) {
+
+  dims   = deparse(substitute(argb))
+  dims   = gsub('\\+',',',dims)
+  tsor   = deparse(substitute(arga))
+  TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
+  
+  rr = RcppSimpleTensor(TENSOR,struct=TRUE)
+
+  # just need to return rr$wrapFunc applied to the arrays in the parent frame
+  # we call funcWrap with the list of M and S from rr$RHS
+  mycall = paste( 'rr$wrapFunc(',paste(
+                               paste(c(rr$RHS$M,rr$RHS$S),sep='',collapse=","),
+                               sep=','), ')')
+
+  return(eval(parse(text=mycall)))
+}
 
