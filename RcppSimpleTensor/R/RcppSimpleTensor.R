@@ -476,20 +476,28 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 #Sum <- function(expr,
 
 TI <- function(arga,argb) {
+    dims   = deparse(substitute(argb))
+    dims   = gsub('\\+',',',dims)
+    tsor   = deparse(substitute(arga))
+    TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
+   
+    rr = RcppSimpleTensor(TENSOR,struct=TRUE)
+    #add the tensor to parent environemnt
+    assign('TI.TEMP',rr,parent.frame())
 
-  dims   = deparse(substitute(argb))
-  dims   = gsub('\\+',',',dims)
-  tsor   = deparse(substitute(arga))
-  TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
-  
-  rr = RcppSimpleTensor(TENSOR,struct=TRUE)
-
-  # just need to return rr$wrapFunc applied to the arrays in the parent frame
-  # we call funcWrap with the list of M and S from rr$RHS
-  mycall = paste( 'rr$wrapFunc(',paste(
+    # just need to return rr$wrapFunc applied to the arrays in the parent frame
+    # we call funcWrap with the list of M and S from rr$RHS
+    mycall = paste( 'TI.TEMP$wrapFunc(',paste(
                                paste(c(rr$RHS$M,rr$RHS$S),sep='',collapse=","),
                                sep=','), ')')
 
-  return(eval(parse(text=mycall)))
+    #cat(ls(environment()),'\n')
+    #cat(ls(parent.frame()),'\n')
+    res = eval(parse(text=mycall),parent.frame())
+    
+    # remove the tensor from top env
+    assign('TI.TEMP',NULL,parent.frame())
+
+    return(res)
 }
 
