@@ -69,9 +69,13 @@ It requires the packages Rcpp and inline. If they were not automatically install
 
 And that's all. Note however that to work, Rcpp will need the Cpp tool chain, but it would be surprising if you didn't have that already. 
 
-### A very simple example
 
-Here is a very studi example that just does a matrix multiplication
+Examples
+===================
+
+### A very simple example: matrix multiplication
+
+Here is a very simple example that just does a matrix multiplication
 
     MULT = RcppSimpleTensor( R[i] ~ A[i,j] * B[j])
 
@@ -86,7 +90,43 @@ Here is a very studi example that just does a matrix multiplication
 Note how the the `j` dimension is summed automatically because it does not appear
 on the left hand side.
 
-I promise I will give you more detailed example soon! 
+### Fast building of multidimensional arrays
+
+Suppose you have a function f defined on the tensor product of three linear spaces, e.g. 
+
+    f <- function(x,y,z) {(x + y - 5)^2 + (z-15)^0.5}
+
+    x <- array(data=seq(1,10,le=10),dim=c(10,1))
+    y <- array(data=seq(-5,40,le=20),dim=c(20,1))
+    z <- array(data=rnorm(n=30,mean=50),dim=c(30,1))
+
+If you have to evaluate f many times, for different sets of values stored in (x,y,z), say, then the following formulation is convenient (as opposed to writing a triple loop to calculate the function values):
+
+    Fillf <- RcppSimpleTensor( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
+
+## An alternative would be to write
+    
+    looparray <- array(0,dim=c(length(x),length(y),length(z)))
+    system.time(
+    for (ix in 1:length(x)){
+        for (iy in 1:length(y)){
+            for (iz in 1:length(z)){
+                looparray[ix,iy,iz] <- f(x[ix],y[iy],z[iz]);
+            }
+        }
+    }
+    )
+
+    system.time(tensarray <- Fillf(x,y,z))  ## measure time and evaluate Fillf()
+    max(abs(looparray - tensarray))
+
+## using the inline formulation TI()
+
+RcppSimpleTensor also comes with a convenient inline formulation. Instead of declaring Fillf() in the example above before usage, we could also have written
+
+    TIarray <- TI( pow(x[i] + y[j] - 5,2) + pow(z[k] - 15,0.5 ), i+j+k)
+    max(abs(TIarray - looparray))
+
 
 Future developments
 ===================
