@@ -104,7 +104,7 @@ If you have to evaluate f many times, for different sets of values stored in (x,
 
     Fillf <- RcppSimpleTensor( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
 
-## An alternative would be to write
+An alternative would be to write a loop:
     
     looparray <- array(0,dim=c(length(x),length(y),length(z)))
     system.time(
@@ -120,7 +120,7 @@ If you have to evaluate f many times, for different sets of values stored in (x,
     system.time(tensarray <- Fillf(x,y,z))  ## measure time and evaluate Fillf()
     max(abs(looparray - tensarray))
 
-## using the inline formulation TI()
+#### using the inline formulation TI()
 
 RcppSimpleTensor also comes with a convenient inline formulation. Instead of declaring Fillf() in the example above before usage, we could also have written
 
