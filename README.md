@@ -100,32 +100,24 @@ Suppose you have a function f defined on the tensor product of three linear spac
     y <- array(data=seq(-5,40,le=20),dim=c(20,1))
     z <- array(data=rnorm(n=30,mean=50),dim=c(30,1))
 
-If you have to evaluate f many times, for different sets of values stored in (x,y,z), say, then the following formulation is convenient (as opposed to writing a triple loop to calculate the function values):
+If you have to evaluate f many times, for different sets of values stored in (x,y,z), say, then the following formulation is convenient:
 
     Fillf <- RcppSimpleTensor( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
 
-An alternative would be to write a loop:
-    
-    looparray <- array(0,dim=c(length(x),length(y),length(z)))
-    system.time(
-    for (ix in 1:length(x)){
-        for (iy in 1:length(y)){
-            for (iz in 1:length(z)){
-                looparray[ix,iy,iz] <- f(x[ix],y[iy],z[iz]);
-            }
-        }
-    }
-    )
+An alternative would be to use mapply:
 
+    rr <- expand.grid(x=x,y=y,z=z)
+    system.time(mapplyxyz <- array( with(rr, mapply(f,x,y,z)), dim=c(10,20,30) ))
+    
     system.time(tensarray <- Fillf(x,y,z))  ## measure time and evaluate Fillf()
-    max(abs(looparray - tensarray))
+    max(abs(mapplyxyz - tensarray))
 
 #### using the inline formulation TI()
 
 RcppSimpleTensor also comes with a convenient inline formulation. Instead of declaring Fillf() in the example above before usage, we could also have written
 
     TIarray <- TI( pow(x[i] + y[j] - 5,2) + pow(z[k] - 15,0.5 ), i+j+k)
-    max(abs(TIarray - looparray))
+    max(abs(TIarray - mapplyxyz))
 
 
 Future developments
