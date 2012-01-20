@@ -337,8 +337,6 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
 
 }
 
-#}
-#registerPlugin( "omp", plug )
 mycxxfunction <- function (sig = character(), body = character(), plugin = "default", 
     includes = "", settings = getPlugin(plugin), file= basename(tempfile()) , ..., verbose = FALSE , cache = FALSE) 
 {
@@ -507,6 +505,17 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 # TODO: use substitute instead of terms
 # TODO: use only expression, not strings, and evaluate the subparts!!!!
 
+# ----- Roxygen Documentation
+#' This function directly evaluates the tensor expression
+#' using the arrays available in the current scope
+#'
+#'
+#' @param tensorexp tensor expression containing valid arrays 
+#' @param indexs    the ordered list of the dimension of the return array
+#' @keywords tensor cpp compile inline
+#' @export
+#' @examples
+#' R = TI(M[i,j] * A[i],j) 
 TI <- function(arga,argb) {
     dims   = deparse(substitute(argb))
     dims   = gsub('\\+',',',dims)
