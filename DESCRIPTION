@@ -3,9 +3,14 @@ Type: Package
 Title: A package to readily write fast tensor expressions
 Version: 0.2
 Date: 2011-05-13
-Author: Thibaut Lamadon 
+Author: Thibaut Lamadon
 Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>
 Description: More about what it does (maybe more than one line)
 License: MIT
-Depends: R (>= 2.12.1), Rcpp (>= 0.9.3), inline (>= 0.3.8)
+Depends:
+    R (>= 2.12.1),
+    Rcpp (>= 0.9.3),
+    inline (>= 0.3.8)
 LazyLoad: yes
+Collate:
+    'RcppSimpleTensor-package.r'
