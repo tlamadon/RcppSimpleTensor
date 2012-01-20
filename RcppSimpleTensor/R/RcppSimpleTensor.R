@@ -475,9 +475,13 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 
 #Sum <- function(expr,
 
+# TODO: use substitute instead of terms
+# TODO: use only expression, not strings, and evaluate the subparts!!!!
+
 TI <- function(arga,argb) {
     dims   = deparse(substitute(argb))
     dims   = gsub('\\+',',',dims)
+   
     tsor   = deparse(substitute(arga))
     TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
    
