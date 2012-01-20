@@ -4,7 +4,7 @@ Title: A package to readily write fast tensor expressions
 Version: 0.2
 Date: 2011-05-13
 Author: Thibaut Lamadon
-Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>
+Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>, Florian Oswald <florian.oswald@gmail.com>
 Description: More about what it does (maybe more than one line)
 License: MIT
 Depends:
