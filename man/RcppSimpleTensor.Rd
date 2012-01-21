@@ -8,7 +8,18 @@
     struct = FALSE)
 }
 \arguments{
-  \item{tensorexp}{tensor expression}
+  \item{expr}{tensor expression}
+
+  \item{cache}{whether you want the function to look for a
+  cached version of the tensor. RcppSimpleTensor will look
+  in the hidden .tensor folder in the working directory for
+  a previously compiled binray for that particular tensor.}
+
+  \item{verbose}{prints information about the compilation
+  if any as well as the generated source code}
+
+  \item{struct}{returns a structure with all the
+  description instead of just the wrapping function}
 }
 \description{
   The goal of this library is to help create cpp

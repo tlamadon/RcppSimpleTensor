@@ -173,7 +173,13 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 #' for it, compiles the code, links the compiled code, and returns a 
 #' a R function that wraps the C++ tensor
 #'
-#' @param tensorexp tensor expression 
+#' @param expr tensor expression 
+#' @param cache whether you want the function to look for a cached version of the tensor.
+#' RcppSimpleTensor will look in the hidden .tensor folder in the working directory for
+#' a previously compiled binray for that particular tensor.
+#' @param verbose prints information about the compilation if any as well as the generated
+#' source code
+#' @param struct returns a structure with all the description instead of just the wrapping function
 #' @keywords tensor cpp compile
 #' @export
 #' @examples
@@ -511,19 +517,19 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 #' using the arrays available in the current scope
 #'
 #'
-#' @param tensorexp tensor expression containing valid arrays, for example A[i,j]*B[j]
-#' @param indexs    the ordered list of the dimension of the return array, for example i+j+k
+#' @param argTensor tensor expression containing valid arrays, for example A[i,j]*B[j]
+#' @param argDims    the ordered list of the dimension of the return array, for example i+j+k
 #' @keywords tensor cpp compile inline
 #' @export
 #' @examples
 #' M = array(rnorm(9),dim=c(3,3))
 #' A = array(rnorm(3),dim=c(3))
 #' R = TI(M[i,j] * A[i],j) 
-TI <- function(arga,argb) {
-    dims   = deparse(substitute(argb))
+TI <- function(argTensor,argDims) {
+    dims   = deparse(substitute(argDims))
     dims   = gsub('\\+',',',dims)
    
-    tsor   = deparse(substitute(arga))
+    tsor   = deparse(substitute(argTensor))
     TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
    
     rr = RcppSimpleTensor(TENSOR,struct=TRUE)

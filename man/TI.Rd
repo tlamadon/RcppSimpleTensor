@@ -3,14 +3,14 @@
 \title{This function directly evaluates the tensor expression
 using the arrays available in the current scope}
 \usage{
-  TI(arga, argb)
+  TI(argTensor, argDims)
 }
 \arguments{
-  \item{tensorexp}{tensor expression containing valid
-  arrays}
+  \item{argTensor}{tensor expression containing valid
+  arrays, for example A[i,j]*B[j]}
 
-  \item{indexs}{the ordered list of the dimension of the
-  return array}
+  \item{argDims}{the ordered list of the dimension of the
+  return array, for example i+j+k}
 }
 \description{
   This function directly evaluates the tensor expression
