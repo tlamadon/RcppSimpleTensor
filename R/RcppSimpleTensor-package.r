@@ -5,9 +5,10 @@
 #' ...
 #' 
 #' @import Rcpp 
+#' @import digest
 #' @docType package
 #' @name RcppSimpleTensor
-#' @author Thibaut Lamadon \email{thibaut.lamadon@@gmail.com}
+#' @author Thibaut Lamadon \email{thibaut.lamadon@@gmail.com} , Florian Oswald <florian.oswald@@gmail.com>
 #' @references
 #' \url{https://github.com/tlamadon/RcppSimpleTensor}
 #' @aliases RcppSimpleTensor RcppSimpleTensor-package
@@ -176,7 +177,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 #' @keywords tensor cpp compile
 #' @export
 #' @examples
-#' matMult = RccpSimpleTensor(R[j] = M[i,j] * A[i]) 
+#' matMult = RcppSimpleTensor(R[j] ~ M[i,j] * A[i]) 
 RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
 
   # look if we already have this compiled localy
@@ -510,11 +511,13 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
 #' using the arrays available in the current scope
 #'
 #'
-#' @param tensorexp tensor expression containing valid arrays 
-#' @param indexs    the ordered list of the dimension of the return array
+#' @param tensorexp tensor expression containing valid arrays, for example A[i,j]*B[j]
+#' @param indexs    the ordered list of the dimension of the return array, for example i+j+k
 #' @keywords tensor cpp compile inline
 #' @export
 #' @examples
+#' M = array(rnorm(9),dim=c(3,3))
+#' A = array(rnorm(3),dim=c(3))
 #' R = TI(M[i,j] * A[i],j) 
 TI <- function(arga,argb) {
     dims   = deparse(substitute(argb))

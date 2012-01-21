@@ -1,3 +1,4 @@
 export(RcppSimpleTensor)
 export(TI)
+import(digest)
 import(Rcpp)

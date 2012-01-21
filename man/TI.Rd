@@ -17,6 +17,8 @@ using the arrays available in the current scope}
   using the arrays available in the current scope
 }
 \examples{
+M = array(rnorm(9),dim=c(3,3))
+A = array(rnorm(3),dim=c(3))
 R = TI(M[i,j] * A[i],j)
 }
 \keyword{compile}

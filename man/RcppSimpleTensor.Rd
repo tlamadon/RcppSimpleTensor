@@ -22,10 +22,11 @@
   tensor
 }
 \examples{
-matMult = RccpSimpleTensor(R[j] = M[i,j] * A[i])
+matMult = RcppSimpleTensor(R[j] ~ M[i,j] * A[i])
 }
 \author{
-  Thibaut Lamadon \email{thibaut.lamadon@gmail.com}
+  Thibaut Lamadon \email{thibaut.lamadon@gmail.com} ,
+  Florian Oswald <florian.oswald@gmail.com>
 }
 \references{
   \url{https://github.com/tlamadon/RcppSimpleTensor}
