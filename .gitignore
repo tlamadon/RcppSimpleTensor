@@ -3,3 +3,4 @@
 inst/tests/.tensor/*
 .Rapp.history
 .tensor/*
+Rprof.out

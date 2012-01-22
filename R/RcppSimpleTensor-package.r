@@ -214,11 +214,10 @@ tensorFunction <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 
   # parse the expression usign substitute
-  if (is.character(expr)) {
+  if (typeof(a)=='language') {
+  } else if (is.character(expr)) {
     a = as.formula(expr)
-  } else {
-    a = substitute(expr)
-  }
+  } 
 
   # look if we already have this compiled localy
   strexpr  =  deparse(a)
