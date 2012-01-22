@@ -25,7 +25,6 @@ NULL
 #   TI(expression ,  k+l|i+j       ) or
 #   TI(expression ,  shape=G[i,j,k])
 
-
 # I create a multidimensional array
 require(Rcpp)
 require(inline)
@@ -33,6 +32,15 @@ require(digest)
 
 # check out ?methods to overload $
 
+# this will store the list of currently
+# know tensors - each tensors will have 
+# a formula, a hash, a file path, last date of compilation,
+# a function call, a signature with associated dimensions.
+RCPP_TENSOR_LIST = list()
+
+# storing the list of options
+RCPP_OPTS = list(
+       build_folder='.tensor/')
 
 # this function takes a term and 
 # grabs informations about the tensor expression
@@ -74,7 +82,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
         indexlag = as.numeric(at[[3]])
         index  = paste(at[[2]])      
       } else {
-	indexlag=0
+	      indexlag=0
         index  = paste(at)      
       }
 
@@ -91,7 +99,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
       if (indexlag>0) {
         LAG_STR = paste('-',indexlag)
       } else {
-	LAG_STR = ''
+	      LAG_STR = ''
       }
 
       # using the size and index, create the Cpp pointer with correct value
@@ -163,6 +171,17 @@ RcppSimpleTensorGetArgs <- function(a,r) {
   } 
 }
 
+
+
+#' Returns the list of current available compile C++ tensors 
+#'
+#' @keywords tensor cpp compile
+#' @export
+#' @examples
+getTensorList <- function() {
+  return(RCPP_TENSOR_LIST)
+}
+
 # creates the c fucntion from expression
 
 # ----- Roxygen Documentation
@@ -174,6 +193,9 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 #' a R function that wraps the C++ tensor
 #'
 #' @param expr tensor expression 
+#' @param name name to be associated with the tensor. The name is used to store the binary file
+#' and the link to the object in a global list. Note that conflicts can happen if several packages
+#' use identical names. If no name is provided a hash from the expression is computed.
 #' @param cache whether you want the function to look for a cached version of the tensor.
 #' RcppSimpleTensor will look in the hidden .tensor folder in the working directory for
 #' a previously compiled binray for that particular tensor.
@@ -183,29 +205,38 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 #' @keywords tensor cpp compile
 #' @export
 #' @examples
-#' matMult = RcppSimpleTensor(R[j] ~ M[i,j] * A[i]) 
-RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
+#' matMult = tensorFunction(R[j] ~ M[i,j] * A[i]) 
+tensorFunction <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
+  rr = createCppTensor(expr=expr,name=name,cache=cache,verbose=verbose);
+  return(rr$wrapFunc);
+}
 
-  # look if we already have this compiled localy
-  fhash = digest(paste(expr,collapse=""))
-  filename =paste('rcpptensor',fhash,sep="")
+createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 
-  # for testing
-  # a = terms(R[i,j] ~ beta * B[i,k] * A[j,k])
-  # a = terms(R[i,j] ~ I( beta > S[i,j]))
-  # parse the expression usign terms
+  # parse the expression usign substitute
   if (is.character(expr)) {
-    a = terms(as.formula(expr))
+    a = as.formula(expr)
   } else {
-    a = terms(expr)
+    a = substitute(expr)
   }
 
+  # look if we already have this compiled localy
+  strexpr  =  deparse(a)
+  fhash    = digest(strexpr) 
+  if (is.null(name)) name = fhash;
+  filename = paste('rcpptensor_',fhash,sep="")
+
+  # if we already have the tensor in our local list and cache==TRUE, then just return it
+  ltensor = RCPP_TENSOR_LIST[[name]]
+  if (!is.null(ltensor) & cache==TRUE) return(ltensor);
+
+  # otherwise we have to go to work!
   if (a[[1]] != '~') {
     cat("the formula needs to be of the form R[...] ~ ...")
     return()
   }
 
-  # extract right hand side
+  # extract RHS and LHS
   r= list(D= data.frame(), S=c(), M=c() , I=c())
   RHS = RcppSimpleTensorGetArgs(a[[3]],r)
   LHS = RcppSimpleTensorGetArgs(a[[2]],r)
@@ -214,8 +245,7 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
   indiceSum = setdiff(RHS$I,LHS$I)
   indiceOut = LHS$I
 
-  # creating signature and
-  # source head
+  # creating signature and source's head
   sig = c()
   sign = c()
   src=""
@@ -302,49 +332,117 @@ RcppSimpleTensor <- function(expr,cache=TRUE,verbose=FALSE,struct=FALSE) {
     #cat(CODE)
   }
 
-  tmpfun <- mycxxfunction(sig, CODE,plugin="Rcpp",file=filename,includes="#include <math.h>",verbose=verbose,cache=cache)
+  tmpfun <- rsp_cxxfunction(sig, CODE,plugin="Rcpp",file=filename,includes="#include <math.h>",verbose=verbose,cache=cache)
 
   # finally we wrap it into another function that will get the sizes 
-  # automatically from the matrices
+  # automatically from the matrices -- we want the wrap function 
+  # to have the correct names, so we want to remove the _ from them
 
   # I construct again a function instead of using do.call which
   # seems very slow, I want to frontload as much as possible
 
-  WRAPFUNC = paste("tmpFunWrap <- function(", paste(names(reduceSig),collapse=",") ,") {",";", sep="");
+  WRAPFUNC = paste("tmpFunWrap <- function(", paste(gsub('_$','',names(reduceSig)),collapse=",") ,") {",";", sep="");
   # Adding automatic computation of the indices dimensions
   dd = RHS$D
   for (i in c(indiceOut,indiceSum)) {
     # find where to get the size from 
     ddt = dd[dd$I==i,]
-    WRAPFUNC = paste(WRAPFUNC, i , "_ = dim(", ddt$M[1] ,"_)[", ddt$dim[1] ,"]" ,";",sep ="")  
+    WRAPFUNC = paste(WRAPFUNC, i , " = dim(", ddt$M[1] ,")[", ddt$dim[1] ,"]" ,";",sep ="")  
   }
   # Calling the C function
-  WRAPFUNC = paste(WRAPFUNC, "R = tmpfun(", paste(names(sig),collapse=",") ,");",sep ="")  
+  WRAPFUNC = paste(WRAPFUNC, "R = tmpfun(", paste(gsub('_$','',names(sig)),collapse=",") ,");",sep ="")  
   # Reshape the answer
   dd = LHS$D
-  WRAPFUNC = paste(WRAPFUNC, "dim(R) <- c(", paste(paste(dd$I[order(dd$dim)],"_",sep=""),collapse=","),") ;",sep="")
+  WRAPFUNC = paste(WRAPFUNC, "dim(R) <- c(", paste(paste(dd$I[order(dd$dim)],sep=""),collapse=","),") ;",sep="")
   WRAPFUNC = paste(WRAPFUNC, "return(R)}" ,sep="")
+
+  argnamelist = paste(gsub('_$','',names(reduceSig)),collapse=",")
 
   if (verbose) {
     cat(WRAPFUNC)
   }
 
   eval(parse(text=WRAPFUNC))
-  
-  if (struct) {
-    res = list()
-    res$inFunc = tmpfun
-    res$sig    = sig
-    res$wrapFunc = tmpFunWrap
-    res$RHS = RHS
-    return(res)
-  }else {
-    return(tmpFunWrap)
-  }
+ 
+  # add the current tensor to the list
+  res = list()
+  res$inFunc   = tmpfun
+  res$sig      = sig
+  res$wrapFunc = tmpFunWrap
+  res$RHS      = RHS
+  res$hash     = fhash
+  res$str_expr = strexpr
+  res$filename = filename
+  res$name     = name
+  res$argnamelist  = argnamelist
+  class(res) <- 'cpptensor'
 
+  # check if the hash is already in the list, if not add it!
+  if ( !(name %in% names(RCPP_TENSOR_LIST))) {
+    RCPP_TENSOR_LIST[[length(RCPP_TENSOR_LIST)+1]]     <- res
+    names(RCPP_TENSOR_LIST)[length(RCPP_TENSOR_LIST)]  <- name
+    RCPP_TENSOR_LIST<<- RCPP_TENSOR_LIST
+  } else {
+    # create an error!
+    warning('This tensor hash is already in the list, that should never happen!\n')
+  }
+  
+  return(res)
 }
 
-mycxxfunction <- function (sig = character(), body = character(), plugin = "default", 
+
+print.cpptensor <- function(tensor) {  
+  cat('C++ tensor: ',tensor$str_expr,'\n')
+  cat('    file  : ',tensor$filename,'\n\n')
+}
+
+
+# TODO: use substitute instead of terms
+# TODO: use only expression, not strings, and evaluate the subparts!!!!
+
+# ----- Roxygen Documentation
+#' This function directly evaluates the tensor expression
+#' using the arrays available in the current scope
+#'
+#'
+#' @param argTensor tensor expression containing valid arrays, for example A[i,j]*B[j]
+#' @param argDims    the ordered list of the dimension of the return array, for example i+j+k
+#' @keywords tensor cpp compile inline
+#' @export
+#' @examples
+#' M = array(rnorm(9),dim=c(3,3))
+#' A = array(rnorm(3),dim=c(3))
+#' R = TI(M[i,j] * A[i],j) 
+TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
+
+    # checking if we have the tensor in the list
+    if (!is.null(name)) { ltensor = RCPP_TENSOR_LIST[[name]] } else {ltensor=NULL}
+    if (!is.null(ltensor)) {
+      rr = ltensor ;
+    } else {
+
+      dims   = deparse(substitute(argDims))
+      dims   = gsub('\\+',',',dims)
+     
+      tsor   = deparse(substitute(argTensor))
+      TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
+   
+      rr = createCppTensor(TENSOR,name=name)  
+    }
+
+    # get the list of arguments from parent environment
+    argvals = eval(parse(text=paste('list(' , paste(rr$argnamelist,collapse=','),')')),environment())
+    res = do.call(rr$wrapFunc,argvals)
+    
+    return(res)
+}
+
+
+# =====================================================
+# this reimplement the inline funciton but allows
+# reloading of the binary if found
+
+rsp_cxxfunction <- function (sig = character(), body = character(), plugin = "default", 
     includes = "", settings = getPlugin(plugin), file= basename(tempfile()) , ..., verbose = FALSE , cache = FALSE) 
 {
     #f <- basename(tempfile())
@@ -413,7 +511,7 @@ mycxxfunction <- function (sig = character(), body = character(), plugin = "defa
         dir.create('.tensor') 
     }
 
-    libLFile <- mycompileCode(f, code, language = language, verbose = verbose,dir  = paste(getwd(),'/.tensor/',sep=""),cache = cache)
+    libLFile <- rsp_compileCode(f, code, language = language, verbose = verbose,dir  = paste(getwd(),'/.tensor/',sep=""),cache = cache)
     #cleanup <- function(env) {
     #    if (f %in% names(getLoadedDLLs())) 
     #        dyn.unload(libLFile)
@@ -456,7 +554,7 @@ mycxxfunction <- function (sig = character(), body = character(), plugin = "defa
     else res
 }
 
-mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALSE) 
+rsp_compileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALSE) 
 {
     wd = getwd()
     on.exit(setwd(wd))
@@ -505,51 +603,6 @@ mycompileCode <- function (f, code, language, verbose, dir = tmpdir(),cache=FALS
             paste(errmsg, collapse = "\n")))
     }
     return(libLFile)
-}
-
-#Sum <- function(expr,
-
-# TODO: use substitute instead of terms
-# TODO: use only expression, not strings, and evaluate the subparts!!!!
-
-# ----- Roxygen Documentation
-#' This function directly evaluates the tensor expression
-#' using the arrays available in the current scope
-#'
-#'
-#' @param argTensor tensor expression containing valid arrays, for example A[i,j]*B[j]
-#' @param argDims    the ordered list of the dimension of the return array, for example i+j+k
-#' @keywords tensor cpp compile inline
-#' @export
-#' @examples
-#' M = array(rnorm(9),dim=c(3,3))
-#' A = array(rnorm(3),dim=c(3))
-#' R = TI(M[i,j] * A[i],j) 
-TI <- function(argTensor,argDims) {
-    dims   = deparse(substitute(argDims))
-    dims   = gsub('\\+',',',dims)
-   
-    tsor   = deparse(substitute(argTensor))
-    TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
-   
-    rr = RcppSimpleTensor(TENSOR,struct=TRUE)
-    #add the tensor to parent environemnt
-    assign('TI.TEMP',rr,parent.frame())
-
-    # just need to return rr$wrapFunc applied to the arrays in the parent frame
-    # we call funcWrap with the list of M and S from rr$RHS
-    mycall = paste( 'TI.TEMP$wrapFunc(',paste(
-                               paste(c(rr$RHS$M,rr$RHS$S),sep='',collapse=","),
-                               sep=','), ')')
-
-    #cat(ls(environment()),'\n')
-    #cat(ls(parent.frame()),'\n')
-    res = eval(parse(text=mycall),parent.frame())
-    
-    # remove the tensor from top env
-    assign('TI.TEMP',NULL,parent.frame())
-
-    return(res)
 }
 
 

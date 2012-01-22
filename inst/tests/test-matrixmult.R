@@ -1,4 +1,4 @@
-MULT = RcppSimpleTensor( R[i] ~ A[i,j] * B[j])
+MULT = tensorFunction( R[i] ~ A[i,j] * B[j])
 
 n = 100
 A = array(rnorm(n^2),dim=c(n,n))
