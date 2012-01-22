@@ -1,4 +1,5 @@
-export(RcppSimpleTensor)
+export(getTensorList)
+export(tensorFunction)
 export(TI)
 import(digest)
 import(Rcpp)

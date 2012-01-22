@@ -7,4 +7,4 @@ B1 = MULT(A,x)
 B2 = A %*% x
 dim(B2) <- c(n) # because it is 1xn but should be just n
 
-expect_equal(B1, B2)
+expect_equal(B1, B2, label='testing multiplication equality')

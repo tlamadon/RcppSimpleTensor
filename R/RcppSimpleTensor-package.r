@@ -172,12 +172,12 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 }
 
 
-
 #' Returns the list of current available compile C++ tensors 
 #'
 #' @keywords tensor cpp compile
 #' @export
 #' @examples
+#' getTensorList()
 getTensorList <- function() {
   return(RCPP_TENSOR_LIST)
 }
@@ -201,7 +201,6 @@ getTensorList <- function() {
 #' a previously compiled binray for that particular tensor.
 #' @param verbose prints information about the compilation if any as well as the generated
 #' source code
-#' @param struct returns a structure with all the description instead of just the wrapping function
 #' @keywords tensor cpp compile
 #' @export
 #' @examples
@@ -213,8 +212,11 @@ tensorFunction <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 
 createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 
+  #RCPP_TENSOR_LIST = NULL
+
   # parse the expression usign substitute
-  if (typeof(a)=='language') {
+  if (typeof(expr)=='language') {
+    a = expr
   } else if (is.character(expr)) {
     a = as.formula(expr)
   } 
@@ -340,6 +342,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   # I construct again a function instead of using do.call which
   # seems very slow, I want to frontload as much as possible
 
+  tmpFunWrap = NULL
   WRAPFUNC = paste("tmpFunWrap <- function(", paste(gsub('_$','',names(reduceSig)),collapse=",") ,") {",";", sep="");
   # Adding automatic computation of the indices dimensions
   dd = RHS$D
@@ -377,10 +380,12 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   class(res) <- 'cpptensor'
 
   # check if the hash is already in the list, if not add it!
+  # not thread safe!!!!!
   if ( !(name %in% names(RCPP_TENSOR_LIST))) {
+    #tmplist = RCPP_TENSOR_LIST
     RCPP_TENSOR_LIST[[length(RCPP_TENSOR_LIST)+1]]     <- res
     names(RCPP_TENSOR_LIST)[length(RCPP_TENSOR_LIST)]  <- name
-    RCPP_TENSOR_LIST<<- RCPP_TENSOR_LIST
+    #RCPP_TENSOR_LIST<<- tmplist
   } else {
     # create an error!
     warning('This tensor hash is already in the list, that should never happen!\n')
@@ -406,6 +411,8 @@ print.cpptensor <- function(tensor) {
 #'
 #' @param argTensor tensor expression containing valid arrays, for example A[i,j]*B[j]
 #' @param argDims    the ordered list of the dimension of the return array, for example i+j+k
+#' @param name      readable name for faster look up (see vignette)
+#' @param shape     if shape can't be infered from argument (no implemented yet)
 #' @keywords tensor cpp compile inline
 #' @export
 #' @examples
