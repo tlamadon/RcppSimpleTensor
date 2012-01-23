@@ -36,11 +36,14 @@ require(digest)
 # know tensors - each tensors will have 
 # a formula, a hash, a file path, last date of compilation,
 # a function call, a signature with associated dimensions.
+
 RCPP_TENSOR_LIST = list()
 
 # storing the list of options
 RCPP_OPTS = list(
-       build_folder='.tensor/')
+       build_folder='.tensor/',
+       RCPP_TENSOR_LIST = list()
+)
 
 # this function takes a term and 
 # grabs informations about the tensor expression
@@ -172,14 +175,14 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 }
 
 
-#' Returns the list of current available compile C++ tensors 
-#'
-#' @keywords tensor cpp compile
-#' @export
-#' @examples
-#' getTensorList()
+# Returns the list of current available compile C++ tensors 
+#
+# @keywords tensor cpp compile
+# @export
+# @examples
+# getTensorList()
 getTensorList <- function() {
-  return(RCPP_TENSOR_LIST)
+  return(RCPP_OPTS$RCPP_TENSOR_LIST)
 }
 
 # creates the c fucntion from expression
@@ -381,15 +384,15 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 
   # check if the hash is already in the list, if not add it!
   # not thread safe!!!!!
-  if ( !(name %in% names(RCPP_TENSOR_LIST))) {
-    #tmplist = RCPP_TENSOR_LIST
-    RCPP_TENSOR_LIST[[length(RCPP_TENSOR_LIST)+1]]     <- res
-    names(RCPP_TENSOR_LIST)[length(RCPP_TENSOR_LIST)]  <- name
-    #RCPP_TENSOR_LIST<<- tmplist
-  } else {
-    # create an error!
-    warning('This tensor hash is already in the list, that should never happen!\n')
-  }
+#  if ( !(name %in% names(RCPP_TENSOR_LIST))) {
+#    tmplist = RCPP_OPTS$RCPP_TENSOR_LIST
+#    RCPP_TENSOR_LIST[[length(RCPP_TENSOR_LIST)+1]]     <<- res
+#    names(RCPP_TENSOR_LIST)[length(RCPP_TENSOR_LIST)]  <<- name
+#    #RCPP_TENSOR_LIST<<- tmplist
+#  } else {
+#    # create an error!
+#    warning('This tensor hash is already in the list, that should never happen!\n')
+#  }
   
   return(res)
 }

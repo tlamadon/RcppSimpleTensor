@@ -1,4 +1,3 @@
-export(getTensorList)
 export(tensorFunction)
 export(TI)
 import(digest)
