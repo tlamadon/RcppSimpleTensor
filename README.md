@@ -77,7 +77,7 @@ Examples
 
 Here is a very simple example that just does a matrix multiplication
 
-    MULT = RcppSimpleTensor( R[i] ~ A[i,j] * B[j])
+    MULT = tensorFunction( R[i] ~ A[i,j] * B[j])
 
     n = 100
     A = array(rnorm(n^2),dim=c(n,n))
@@ -102,7 +102,7 @@ Suppose you have a function f defined on the tensor product of three linear spac
 
 If you have to evaluate f many times, for different sets of values stored in (x,y,z), say, then the following formulation is convenient:
 
-    Fillf <- RcppSimpleTensor( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
+    Fillf <- tensorFunction( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
 
 An alternative would be to use mapply:
 
