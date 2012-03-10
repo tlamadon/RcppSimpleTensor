@@ -8,8 +8,41 @@ rm(list=ls(all=TRUE))
 library(splines)
 library(RcppSimpleTensor)
 
-# Data Setup
+# Usage examples
+# -------------
+
+a <- array(1:8,dim=c(2,2,2))
+b <- array(1,dim=c(2,1))
+B <- array(1,dim=c(2,2))
+
+### matrix mults
+
+# multiply elements of a with b along common index i (col of a), keeping indices j and k 
+a.col <- TI( a[i,j,k] * b[i], j + k)
+
+# multiply elements of a with b along common index j (row of a), keeping indices i and k 
+a.row <- TI( a[i,j,k] * b[j], i + k)
+
+# multiply elements of a with B along common indices i and j
+aB.k <- TI( a[i,j,k] * B[i,j], k)
+
+# multiply elements of a with B along common indices j and k
+aB.i <- TI( a[i,j,k] * B[j,k], i)
+
+
+### other operations
+
+# sum over powers along index k
+a.pow <- TI( a[i,j,k]^b[k], i + j )
+
+# sum over cosines between elements of a and B
+a.cos <- TI( cos(a[i,j,k],B[i,j]), k )
+
+
+# Spline Example
 # ---------
+
+### Data Setup
 
 # 3 dimensions x,y,z
 
@@ -54,8 +87,8 @@ trad.time <- system.time(traditional <- array( with(data.grid, mapply(DGP,x,y,z)
 # define a tensor function to calculate function values:
 RcppVals <- tensorFunction( R[i,j,k] ~ (X[i] + Y[j] - 5)^2 + (Z[k] - 5)^2 )
 # read: return array indexed by [i,j,k], defined as (x[i] + y[j] - 5)^2 + (z[k]-5)^2
-
 Rcpp.time <- system.time( RcppArray <- RcppVals(xdata,ydata,zdata) )
+sum(abs(traditional - RcppArray))
 print(rbind(trad.time,Rcpp.time))
 
 
@@ -98,6 +131,7 @@ pred.vals <- spline.eval( bb, new_X, new_Y, new_Z )
 TIpred.vals <- TI( bb[m1,m2,m3] * new_X[n1,m1] * new_Y[n2,m2] * new_Z[n3,m3], n1+n2+n3)
 sum(pred.vals - TIpred.vals)
 
+zind <- 1:length(new_zdata)
 # test by plotting at different values of Z
 persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,head(zind,1)],main=paste("approximated at z=",head(zind,1)),ticktype="detailed",xlab="rand_x",ylab="rand_y",zlab="approx",theta=300,phi=30)
 persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,tail(zind,1)],main=paste("approximated at z=",tail(zind,1)),ticktype="detailed",xlab="rand_x",ylab="rand_y",zlab="approx",theta=300,phi=30)
