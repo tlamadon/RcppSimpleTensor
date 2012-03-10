@@ -173,10 +173,14 @@ RcppSimpleTensor
 \series default
 package by some examples.
  For information regarding installation, please refer to the website (above).
- Will first demonstrate usage with the help of a very simple example that
- permits a graphical representation.
- Then we will present an application that uses RcppSimpleTensor, where we
- want to find an approximatin to the integral of a multivariate function.
+ We will first demonstrate usage with the help of a very simple example
+ that permits a graphical representation.
+ Then we will present an application that uses 
+\series bold
+RcppSimpleTensor
+\series default
+, where we want to find an approximatin to the integral of a multivariate
+ function.
  
 \end_layout
 
@@ -188,8 +192,16 @@ Usage
 Tensor algebra is a convenient way to deal with high-dimensional objects.
  In a way, it is like matrix multiplication for arrays of general dimension
  N-D.
- Note, however, that the operations one can perform are not restricted to
- be matrix multiplication only, but any kind of mathematical operation 
+ Note, however, that the operations one can perform with the package are
+ 
+\series bold
+not restricted to be matrix multiplication only
+\series default
+, but 
+\series bold
+any kind of mathematical operation
+\series default
+ 
 \emph on
 along a given index
 \emph default
@@ -197,7 +209,7 @@ along a given index
  In this section we demonstrate some ways to use the library by operating
  on three arrays 
 \family typewriter
-a
+A
 \family default
 , 
 \family typewriter
@@ -221,7 +233,7 @@ status open
 
 \begin_layout Plain Layout
 
-a <- array(1:8,dim=c(2,2,2)) 
+A <- array(1:8,dim=c(2,2,2)) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -236,7 +248,7 @@ B <- array(1,dim=c(2,2))
 
 \begin_layout Plain Layout
 
-print(a)
+print(A)
 \end_layout
 
 \begin_layout Plain Layout
@@ -264,10 +276,28 @@ Multidimensional Multiplication
 \end_layout
 
 \begin_layout Standard
-We will use the two main functions in RcppSimpleTensor, tensorFunction and
- TI, to show different forms of matrix multiplication.
- The two functions perform the same tasks, the difference is that TI is
- for inline use, and tensorFunction needs to be defined before usage.
+We will use the two main functions in 
+\series bold
+RcppSimpleTensor
+\series default
+, 
+\family typewriter
+tensorFunction
+\family default
+ and 
+\family typewriter
+TI
+\family default
+, to show different forms of matrix multiplication.
+ The two functions perform the same tasks, the difference is that 
+\family typewriter
+TI
+\family default
+ is for inline use, and 
+\family typewriter
+tensorFunction
+\family default
+ needs to be defined before usage.
  
 \begin_inset Note Note
 status open
@@ -281,8 +311,11 @@ tibo: you should here (or at some point) explain this difference a bit better.
 
 \end_inset
 
-First of all, notice that array a can be visualized as a cube (see figure
- 
+First of all, notice that array 
+\family typewriter
+A
+\family default
+ can be visualized as a cube (see figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:The-array-a"
@@ -378,9 +411,9 @@ end{center}
 \begin_inset Caption
 
 \begin_layout Plain Layout
-The array 
+Array 
 \family typewriter
-a
+A
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:The-array-a"
@@ -397,9 +430,23 @@ name "fig:The-array-a"
 
 \end_inset
 
- We will now perform operations along the 3 different indices of this array,
- and we will denote those indices i (vertical direction), j (horizontal
- direction) and k (in-depth direction).
+ We will now perform operations along the 3 different indices of 
+\family typewriter
+A
+\family default
+, and we will denote those indices 
+\family typewriter
+i
+\family default
+ (vertical direction), 
+\family typewriter
+j
+\family default
+ (horizontal direction) and 
+\family typewriter
+k
+\family default
+ (in-depth direction).
  All of our examples are a form of tensor reduction, i.e.
  we operate along a certain dimension of an array to reduce the array in
  this dimension.
@@ -412,18 +459,55 @@ reference "fig:The-array-a"
 
 , we would flatten the cube along a certain index, applying a certain operation
  to the elements.
- Needless to say, the gains from using RcppSimpleTensor get larger as the
- dimension of a grows, but we will go with this easy example for illustration.
+ Needless to say, the gains from using 
+\series bold
+RcppSimpleTensor
+\series default
+ get larger as the dimension of a grows, but we will go with this easy example
+ for illustration.
 \end_layout
 
 \begin_layout Subsubsection
-Matrix multiply a with b along index i
+Matrix multiply 
+\family typewriter
+A
+\family default
+ with 
+\family typewriter
+b
+\family default
+ along index 
+\family typewriter
+i
 \end_layout
 
 \begin_layout Standard
-As a first task, we want to multiply a with vector b along their common
- index i, that is along the vertical direction of a.
- This means our result will still have indices j and k, as we only 
+As a first task, we want to multiply 
+\family typewriter
+A
+\family default
+ with vector 
+\family typewriter
+b
+\family default
+ along their common index 
+\family typewriter
+i
+\family default
+, that is, along the vertical direction of 
+\family typewriter
+A
+\family default
+.
+ This means our result will still have indices
+\family typewriter
+ j
+\family default
+ and 
+\family typewriter
+k
+\family default
+, as we only 
 \begin_inset Quotes eld
 \end_inset
 
@@ -431,7 +515,15 @@ flattened-out
 \begin_inset Quotes erd
 \end_inset
 
- a along dimension i:
+ 
+\family typewriter
+A
+\family default
+ along dimension 
+\family typewriter
+i
+\family default
+:
 \end_layout
 
 \begin_layout Standard
@@ -440,7 +532,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<usage1,message=FALSE>>=
+<<usage1,message=FALSE,tidy=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -456,7 +548,7 @@ library(RcppSimpleTensor)
 
 \begin_layout Plain Layout
 
-tensFunc <- tensorFunction( R[k,j] ~ a[i,j,k] * b[i] )
+tensFunc <- tensorFunction( R[k,j] ~ A[i,j,k] * b[i] )
 \end_layout
 
 \begin_layout Plain Layout
@@ -467,7 +559,7 @@ tensFunc <- tensorFunction( R[k,j] ~ a[i,j,k] * b[i] )
 
 \begin_layout Plain Layout
 
-y <- tensFunc( a, b)
+y <- tensFunc( A, b)
 \end_layout
 
 \begin_layout Plain Layout
@@ -482,7 +574,7 @@ y
 
 \begin_layout Plain Layout
 
-y <- TI( a[i,j,k] * b[i], k + j)
+y <- TI( A[i,j,k] * b[i], k + j)
 \end_layout
 
 \begin_layout Plain Layout
@@ -502,7 +594,11 @@ y
 
 \begin_layout Standard
 Notice that this is like looking at the cube from above and performing the
- operation a[ ,j,k] * b at each pair of coordinates (j,k).
+ operation 
+\family typewriter
+A[ ,j,k] * b
+\family default
+ at each pair of coordinates (j,k).
  If we let 
 \begin_inset Formula $y_{i,j}$
 \end_inset
@@ -518,10 +614,10 @@ Notice that this is like looking at the cube from above and performing the
 , we obtained 
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{1,1} & = & a_{1,1,1}b_{1}+a_{2,1,1}b_{2}=1\cdot1+2\cdot1=3\\
-y_{2,1} & = & a_{1,2,1}b_{1}+a_{2,2,1}b_{2}=3\cdot1+4\cdot1=7\\
-y_{1,2} & = & a_{1,1,2}b_{1}+a_{2,1,2}b_{2}=5\cdot1+6\cdot1=11\\
-y_{2,2} & = & a_{1,2,2}b_{1}+a_{2,2,2}b_{2}=7\cdot1+8\cdot1=15
+y_{1,1} & = & A_{1,1,1}b_{1}+A_{2,1,1}b_{2}=1\cdot1+2\cdot1=3\\
+y_{2,1} & = & A_{1,2,1}b_{1}+A_{2,2,1}b_{2}=3\cdot1+4\cdot1=7\\
+y_{1,2} & = & A_{1,1,2}b_{1}+A_{2,1,2}b_{2}=5\cdot1+6\cdot1=11\\
+y_{2,2} & = & A_{1,2,2}b_{1}+A_{2,2,2}b_{2}=7\cdot1+8\cdot1=15
 \end{eqnarray*}
 
 \end_inset
@@ -531,7 +627,7 @@ In (Einstein) tensor notation
 status collapsed
 
 \begin_layout Plain Layout
-The tensor notation is named after Einstein if want dispenses with the summation
+The tensor notation is named after Einstein if one dispenses with the summation
  sign.
  The convention is that one is summing over the index that disappears from
  the resulting left hand side.
@@ -554,8 +650,8 @@ http://en.wikipedia.org/wiki/Einstein_notation
 , our operation is defined as 
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{j,k} & = & a_{i,j,k}b_{i}\\
- & = & \sum_{i}a_{i,j,k}b_{i}
+y_{j,k} & = & A_{i,j,k}b_{i}\\
+ & = & \sum_{i}A_{i,j,k}b_{i}
 \end{eqnarray*}
 
 \end_inset
@@ -564,21 +660,48 @@ y_{j,k} & = & a_{i,j,k}b_{i}\\
 \end_layout
 
 \begin_layout Subsubsection
-Matrix multiply along j
+Matrix multiply along 
+\family typewriter
+j
 \end_layout
 
 \begin_layout Standard
-In exact analogy to above, we can assign b to a different (matching!) index
- of a -- in this case j.
+In exact analogy to above, we can assign 
+\family typewriter
+b
+\family default
+ to a different (matching!) index of 
+\family typewriter
+A
+\family default
+ -- in this case 
+\family typewriter
+j
+\family default
+.
  We want to do 
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{i,k} & = & \sum_{j}a_{i,j,k}b_{j}
+y_{i,k} & = & \sum_{j}A_{i,j,k}b_{j}
 \end{eqnarray*}
 
 \end_inset
 
-Thus, we obtain an i by k array:
+Thus, we obtain an 
+\family typewriter
+ni
+\family default
+ by 
+\family typewriter
+nk
+\family default
+ array, where 
+\family typewriter
+nx 
+\family default
+is the number of elements in dimension 
+\family typewriter
+x
 \end_layout
 
 \begin_layout Standard
@@ -592,7 +715,7 @@ status open
 
 \begin_layout Plain Layout
 
-TI( a[i,j,k] * b[j], k + i)
+TI( A[i,j,k] * b[j], k + i)
 \end_layout
 
 \begin_layout Plain Layout
@@ -610,13 +733,21 @@ Matrix multiply with array
 \end_layout
 
 \begin_layout Standard
-Now we do the same with 2 dimensional array B.
+Now we do the same with 2 dimensional array 
+\family typewriter
+B
+\family default
+.
  Much in the same way, we specify common indices, and give the index we
- wish to keep in the result to TI().
+ wish to keep in the result to 
+\family typewriter
+TI()
+\family default
+.
  In terms of tensor notation, we want to do 
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{k} & = & \sum_{i}\sum_{j}a_{i,j,k}B_{i,j}
+y_{k} & = & \sum_{i}\sum_{j}A_{i,j,k}B_{i,j}
 \end{eqnarray*}
 
 \end_inset
@@ -635,7 +766,7 @@ status open
 
 \begin_layout Plain Layout
 
-TI( a[i,j,k] * B[i,j], k)
+TI( A[i,j,k] * B[i,j], k)
 \end_layout
 
 \begin_layout Plain Layout
@@ -656,10 +787,22 @@ Other Multidimensional Operations
 As mentioned above, you are not restricted to do multiplication.
  In general, the functions will accept any binary operator.
  Let's see two examples.
- First, let's the a to the power of b along index k:
+ First, let's take 
+\family typewriter
+A
+\family default
+ to the power of 
+\family typewriter
+b
+\family default
+ along index 
+\family typewriter
+k
+\family default
+:
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{i,j} & = & \sum_{k}\left(a_{i,j,k}\right)^{b_{k}}
+y_{i,j} & = & \sum_{k}\left(A_{i,j,k}\right)^{b_{k}}
 \end{eqnarray*}
 
 \end_inset
@@ -675,7 +818,7 @@ status open
 
 \begin_layout Plain Layout
 
-TI( a[i,j,k] ^ b[k], i + j ) 
+TI( A[i,j,k] ^ b[k], i + j ) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -689,11 +832,22 @@ TI( a[i,j,k] ^ b[k], i + j )
 \end_layout
 
 \begin_layout Standard
-Secondly, let's sum up the cosine's of elements of a and B, keeping only
- dimension k:
+Secondly, let's sum up the cosines of elements of 
+\family typewriter
+A
+\family default
+ and 
+\family typewriter
+B
+\family default
+, keeping only dimension 
+\family typewriter
+k
+\family default
+:
 \begin_inset Formula 
 \begin{eqnarray*}
-y_{k} & = & \sum_{i}\sum_{k}\cos\left(a_{i,j,k},B_{i,j}\right)
+y_{k} & = & \sum_{i}\sum_{k}\cos\left(A_{i,j,k},B_{i,j}\right)
 \end{eqnarray*}
 
 \end_inset
@@ -709,7 +863,7 @@ status open
 
 \begin_layout Plain Layout
 
-TI( cos(a[i,j,k],B[i,j]), k ) 
+TI( cos(A[i,j,k],B[i,j]), k ) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -727,9 +881,17 @@ Application: Evaluation of multidimensional B-splines
 \end_layout
 
 \begin_layout Standard
-Disclaimer: This section is likely to be useful only if you have some prior
- knowledge about B-spline approximation.
- We will use observational data to approximate a multivariate function (or
+
+\series bold
+Disclaimer:
+\series default
+ This section is likely to be useful only if you have some prior knowledge
+ about B-spline approximation.
+ 
+\end_layout
+
+\begin_layout Standard
+We will use observational data to approximate a multivariate function (or
  a 
 \emph on
 data generating process
@@ -786,9 +948,13 @@ where
 \end_inset
 
  respectively.
- The advantages of RcppSimpleTensor are that we can write our code in a
- way which is very close to the mathematical expression, and we have a way
- to easily increase the number of dimensions with little additional cost.
+ The advantages of 
+\series bold
+RcppSimpleTensor
+\series default
+ are that we can write our code in a way which is very close to the mathematical
+ expression, and we have a way to easily increase the number of dimensions
+ with little additional cost.
  
 \end_layout
 
@@ -797,12 +963,41 @@ Data Setup
 \end_layout
 
 \begin_layout Standard
+The general idea is to estimate the 
+\begin_inset Formula $f$
+\end_inset
+
+ at relatively few grid points (
+\family typewriter
+num.x
+\family default
+, 
+\family typewriter
+num.y
+\family default
+ and 
+\family typewriter
+num.z
+\family default
+), to then be able to obtain a function value at an arbitrary point.
+ Imagine a setup where calculating 
+\begin_inset Formula $f$
+\end_inset
+
+ is costly, such that we want 
+\family typewriter
+num.x + num.y + num.z
+\family default
+ to be small.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-<<spline-setup,tidy=FALSE>>=
+<<spline-setup,tidy=FALSE,message=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -812,17 +1007,17 @@ library(splines)
 
 \begin_layout Plain Layout
 
-# select degree of splines 
+if (!require(statmod)) install.packages('statmod')
 \end_layout
 
 \begin_layout Plain Layout
 
-degree <- 3 
+library(statmod)
 \end_layout
 
 \begin_layout Plain Layout
 
-# number of points in each dimension 
+# number of evaluation points in each dimension 
 \end_layout
 
 \begin_layout Plain Layout
@@ -842,31 +1037,83 @@ num.z <- 4
 
 \begin_layout Plain Layout
 
-# make knot vectors.
- we want to clamp the curve at ends of domain, so we need "augmented" knot
- vectors 
+# choose number of integration nodes and method 
+\end_layout
+
+\begin_layout Plain Layout
+
+num.int.z <- 50 
+\end_layout
+
+\begin_layout Plain Layout
+
+num.int.y <- 40 
+\end_layout
+
+\begin_layout Plain Layout
+
+int.z <- gauss.quad(n=num.int.z,kind="hermite")   
+\end_layout
+
+\begin_layout Plain Layout
+
+int.y <- gauss.quad(n=num.int.y,kind="hermite")
+\end_layout
+
+\begin_layout Plain Layout
+
+# select degree of splines 
+\end_layout
+
+\begin_layout Plain Layout
+
+degree <- 3 
+\end_layout
+
+\begin_layout Plain Layout
+
+# get spline knot vector defined on nodes 
 \end_layout
 
 \begin_layout Plain Layout
 
 xknots <- c(rep(0,times=degree),seq(0,10,le=num.x),rep(10,times=degree))
- 
+  
 \end_layout
 
 \begin_layout Plain Layout
 
-yknots <- c(rep(0,times=degree),seq(0,10,le=num.y),rep(10,times=degree))
- 
+zknots<-c(rep(min(int.z$nodes),times=degree),
 \end_layout
 
 \begin_layout Plain Layout
 
-zknots <- c(rep(0,times=degree),seq(0,50,le=num.z),rep(50,times=degree))
+seq(int.z$nodes[1],int.z$nodes[num.int.z],le=num.z),
 \end_layout
 
 \begin_layout Plain Layout
 
-# select grid points where to evaluate the function 
+rep(max(int.z$nodes),times=degree)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+yknots<-c(rep(min(int.y$nodes),times=degree),
+\end_layout
+
+\begin_layout Plain Layout
+
+seq(int.y$nodes[1],int.y$nodes[num.int.y],le=num.y),
+\end_layout
+
+\begin_layout Plain Layout
+
+rep(max(int.y$nodes),times=degree))
+\end_layout
+
+\begin_layout Plain Layout
+
+# get grid points where to evaluate function
 \end_layout
 
 \begin_layout Plain Layout
@@ -876,12 +1123,14 @@ xdata <- as.array(seq(0,10,length=length(xknots)-degree-1))
 
 \begin_layout Plain Layout
 
-ydata <- as.array(seq(0,10,length=length(yknots)-degree-1)) 
+ydata <- as.array(seq(int.y$nodes[1],int.y$nodes[num.int.y],length=length(yknots)-deg
+ree-1)) 
 \end_layout
 
 \begin_layout Plain Layout
 
-zdata <- as.array(seq(0,50,length=length(zknots)-degree-1))
+zdata <- as.array(seq(int.z$nodes[1],int.z$nodes[num.int.z],length=length(zknots)-deg
+ree-1))
 \end_layout
 
 \begin_layout Plain Layout
@@ -906,12 +1155,7 @@ Z <- splineDesign(knots=zknots,x=zdata)
 
 \begin_layout Plain Layout
 
-# define the function that will give us data (data generating process) 
-\end_layout
-
-\begin_layout Plain Layout
-
-DGP <- function( x,y,z ) { return((x + y - 0.5)^2 + (z-0.5)^2) }
+DGP <- function( x,y,z ) { return((x + y - 5)^2 + (z-5)^2) } 
 \end_layout
 
 \begin_layout Plain Layout
@@ -930,7 +1174,11 @@ Generate Data: Evaluate the function
 
 \begin_layout Standard
 We compare evaluation time of the 3-dimensional function with a mapply operation
- and with RcppSimpleTensor, as follows:
+ and with 
+\series bold
+RcppSimpleTensor
+\series default
+, as follows:
 \end_layout
 
 \begin_layout Standard
@@ -949,13 +1197,17 @@ data.grid <- expand.grid(x=xdata,y=ydata,z=zdata)
 
 \begin_layout Plain Layout
 
-# traditional way: do a mapply over a grid:
+trad.time<-system.time(
 \end_layout
 
 \begin_layout Plain Layout
 
-trad.time <- system.time(traditional <- array( with(data.grid, mapply(DGP,x,y,z)),
- dim=c(length(xdata),length(ydata),length(zdata))))
+traditional<-array(with(data.grid,mapply(DGP,x,y,z)),
+\end_layout
+
+\begin_layout Plain Layout
+
+dim=c(length(xdata),length(ydata),length(zdata))))
 \end_layout
 
 \begin_layout Plain Layout
@@ -970,14 +1222,14 @@ trad.time <- system.time(traditional <- array( with(data.grid, mapply(DGP,x,y,z)
 
 \begin_layout Plain Layout
 
-RcppVals <- tensorFunction( R[i,j,k] ~ (X[i] + Y[j] - 0.5)^2 + (Z[k] - 0.5)^2
+RcppVals <- tensorFunction( R[i,j,k] ~ (X[i] + Y[j] - 5)^2 + (Z[k] - 5)^2
  ) 
 \end_layout
 
 \begin_layout Plain Layout
 
-# read: return array indexed by [i,j,k], defined as (x[i] + y[j] - 0.5)^2
- + (z[k]-0.5)^2
+# read: return array indexed by [i,j,k], defined as (x[i] + y[j] - 5)^2
+ + (z[k]-5)^2 
 \end_layout
 
 \begin_layout Plain Layout
@@ -987,7 +1239,17 @@ Rcpp.time <- system.time( RcppArray <- RcppVals(xdata,ydata,zdata) )
 
 \begin_layout Plain Layout
 
-sum(abs(traditional - RcppArray))
+# check result
+\end_layout
+
+\begin_layout Plain Layout
+
+sum(abs(traditional - RcppArray)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+# see timing
 \end_layout
 
 \begin_layout Plain Layout
@@ -1011,10 +1273,24 @@ Visualize the function
 
 \begin_layout Standard
 Just for orientation, let's plot the function at the highest and lowest
- value of variable z, respectively:
+ value of variable z, respectively (see figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:function-DGP-on"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -1022,7 +1298,7 @@ status open
 
 <<plotfun,par=TRUE,tidy=FALSE,echo=FALSE,fig.width=4,fig.height=4,out.width=0.45
 \backslash
-linewidth>>=
+linewidth,cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1052,12 +1328,48 @@ lab="y",zlab="value",theta=300,phi=30);
 
 \end_layout
 
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+function 
+\family typewriter
+DGP 
+\family default
+on the evaluation grid at highest and lowest point of 
+\begin_inset Formula $z$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:function-DGP-on"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Compute Approximant on Grid
 \end_layout
 
 \begin_layout Standard
-Now we obtain the approximating coefficients by solving the system 
+Now we obtain the approximating coefficients 
+\begin_inset Formula $b$
+\end_inset
+
+ by solving the system 
 \begin_inset Formula 
 \[
 y=bA
@@ -1065,8 +1377,31 @@ y=bA
 
 \end_inset
 
-where y are the function values at each grid point, b is our vector of coefficie
-nts and A is the tensor product of X, Y and Z.
+where 
+\begin_inset Formula $y$
+\end_inset
+
+ are the function values at each grid point, 
+\begin_inset Formula $b$
+\end_inset
+
+ is our vector of coefficients and 
+\begin_inset Formula $A$
+\end_inset
+
+ is the tensor product of spaces of grid points 
+\begin_inset Formula $X$
+\end_inset
+
+, 
+\begin_inset Formula $Y$
+\end_inset
+
+ and 
+\begin_inset Formula $Z$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1125,7 +1460,19 @@ Next, we generate random data in the domain of our approximation, and evaluate
 
 \end_inset
 
+where 
+\begin_inset Formula $X_{i},Y_{j},Z_{k}$
+\end_inset
 
+ are the values of the i-th, j-th and k-th basis functions at the values
+ 
+\begin_inset Formula $x,y,z$
+\end_inset
+
+, respectively.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -1136,22 +1483,19 @@ status open
 
 \begin_layout Plain Layout
 
-# new random data
+new_xdata <- sort( runif(n=30,min=min(xdata),max=max(xdata)) ) 
 \end_layout
 
 \begin_layout Plain Layout
 
-new_xdata <- sort(10 * runif( 20 ))
+new_ydata <- sort( runif(n=25,min=min(int.y$nodes),max=max(int.y$nodes) )
+ ) 
 \end_layout
 
 \begin_layout Plain Layout
 
-new_ydata <- sort(10 * runif( 25 ))
-\end_layout
-
-\begin_layout Plain Layout
-
-new_zdata <- sort(50*runif(19))
+new_zdata <- sort( runif(n=21,min=min(int.z$nodes),max=max(int.z$nodes) )
+ ) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -1171,7 +1515,7 @@ new_Y <- splineDesign(knots=yknots,x=new_ydata)
 
 \begin_layout Plain Layout
 
-new_Z <- splineDesign(knots=zknots,x=new_zdata)
+new_Z <- splineDesign(knots=zknots,x=new_zdata) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -1224,7 +1568,7 @@ status open
 
 <<plot-new,par=TRUE,tidy=FALSE,echo=FALSE,fig.width=4,fig.height=4,out.width=0.45
 \backslash
-linewidth>>=
+linewidth,cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1254,20 +1598,45 @@ b="new_x",ylab="new_y",zlab="approx",theta=300,phi=30)
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Perform numerical Integration
 \end_layout
 
 \begin_layout Standard
-Now we redefine z and y as normal, independent random variables, against
- which we want to integrate 
-\begin_inset Formula $f$
+Here we calculate the basis on the entire set of integration nodes, and
+ then we multiply by quadrature weights and sum over the correct indices.
+ We want to approximate
+\begin_inset Formula 
+\[
+E_{YZ}\left[f(x,y,z)\right]=\int f(x,y,z)s(z)g(y)dzdy
+\]
+
 \end_inset
 
-.
- We recompute our approximation on a grid on this redefined space, and generate
- data on all integration nodes.
- Then we evaluate the integrals.
+by
+\begin_inset Formula 
+\[
+\hat{E}_{YZ}\left[f(x,y,z)\right]=\sum_{i}\sum_{j}\omega_{i}^{y}\omega_{j}^{z}\hat{f}(x,\tilde{y_{i}},\tilde{z_{j}})
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left(\omega^{y},\omega^{z},\tilde{y},\tilde{z}\right)$
+\end_inset
+
+ are quadrature weights and nodes for 
+\begin_inset Formula $y,z$
+\end_inset
+
+ respectively.
 \end_layout
 
 \begin_layout Standard
@@ -1276,152 +1645,9 @@ status open
 
 \begin_layout Plain Layout
 
-<<int-setup,tidy=FALSE>>=
-\end_layout
-
-\begin_layout Plain Layout
-
-library(statmod) 
-\end_layout
-
-\begin_layout Plain Layout
-
-# obtain integration nodes
-\end_layout
-
-\begin_layout Plain Layout
-
-num.z <- 50 
-\end_layout
-
-\begin_layout Plain Layout
-
-int.z <- gauss.quad(n=num.z,kind="hermite")   
-\end_layout
-
-\begin_layout Plain Layout
-
-num.y <- 40
-\end_layout
-
-\begin_layout Plain Layout
-
-int.y <- gauss.quad(n=num.y,kind="hermite")
-\end_layout
-
-\begin_layout Plain Layout
-
-# get knots on domain of nodes
-\end_layout
-
-\begin_layout Plain Layout
-
-zknots<-c(rep(min(int.z$nodes),times=degree),
-\end_layout
-
-\begin_layout Plain Layout
-
-seq(int.z$nodes[1],int.z$nodes[num.z],le=6),rep(max(int.z$nodes),times=degree))
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-yknots<-c(rep(min(int.y$nodes),times=degree),
-\end_layout
-
-\begin_layout Plain Layout
-
-seq(int.y$nodes[1],int.y$nodes[num.y],le=7),rep(max(int.y$nodes),times=degree))
-\end_layout
-
-\begin_layout Plain Layout
-
-# make grid to compute approximant on
-\end_layout
-
-\begin_layout Plain Layout
-
-ydata<-as.array(seq(int.y$nodes[1],int.y$nodes[num.y],length=length(yknots)-degree-1
-)) 
-\end_layout
-
-\begin_layout Plain Layout
-
-zdata <- as.array(seq(int.z$nodes[1],int.z$nodes[num.z],length=length(zknots)-degree
--1))
-\end_layout
-
-\begin_layout Plain Layout
-
-# basis on approximation grid	
-\end_layout
-
-\begin_layout Plain Layout
-
-Z <- splineDesign(knots=zknots,x=zdata) 
-\end_layout
-
-\begin_layout Plain Layout
-
-Y <- splineDesign(knots=yknots,x=ydata) 
-\end_layout
-
-\begin_layout Plain Layout
-
-# generate data 
-\end_layout
-
-\begin_layout Plain Layout
-
-RcppArray <- RcppVals(xdata,ydata,zdata)
-\end_layout
-
-\begin_layout Plain Layout
-
-# calculate spline coeffs 
-\end_layout
-
-\begin_layout Plain Layout
-
-b <- solve(kronecker(Z,kronecker(Y,X)), as.vector(RcppArray)) 
-\end_layout
-
-\begin_layout Plain Layout
-
-bb <- array(b,dim=c(length(xdata),length(ydata),length(zdata)))
-\end_layout
-
-\begin_layout Plain Layout
-
-@
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Next step is to obtain data on the finer grid of integration nodes, and
- to integrate.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<<get-intdata,par=TRUE,tidy=FALSE,fig.width=4,fig.height=4,out.width=0.7
+<<get-intdata,par=TRUE,tidy=FALSE,fig.width=4,fig.height=4,out.width=0.5
 \backslash
-linewidth>>=
-\end_layout
-
-\begin_layout Plain Layout
-
-# calculate basis on integration nodes 
+linewidth,cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1432,6 +1658,11 @@ Int.base.z <- splineDesign(knots=zknots,x=int.z$nodes)
 \begin_layout Plain Layout
 
 Int.base.y <- splineDesign(knots=yknots,x=int.y$nodes) 
+\end_layout
+
+\begin_layout Plain Layout
+
+# evaluate spline with RcppSimple
 \end_layout
 
 \begin_layout Plain Layout
@@ -1473,7 +1704,32 @@ Int.y.z <- RcppIntFun( Intdata, yweights, zweights )
 
 \begin_layout Plain Layout
 
-dim(Int.y.z)
+# or inline
+\end_layout
+
+\begin_layout Plain Layout
+
+TI.Int.y.z <- TI( Intdata[nx,ny,nz] * yweights[ny] * zweights[nz], nx ) 
+\end_layout
+
+\begin_layout Plain Layout
+
+# compare
+\end_layout
+
+\begin_layout Plain Layout
+
+sum(Int.y.z - TI.Int.y.z)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(Int.y.z) 
+\end_layout
+
+\begin_layout Plain Layout
+
+# plot integrated function
 \end_layout
 
 \begin_layout Plain Layout
@@ -1492,9 +1748,24 @@ plot(xdata,Int.y.z,type="l")
 \end_layout
 
 \begin_layout Standard
-If we want to integrate only one out of many dimensions, this is very easily
- accomplished with RcppSimpleTensor: just select the right dimensions and
- recompute:
+If we want to integrate only one out of many dimensions, like in 
+\begin_inset Formula 
+\[
+\hat{E}_{Y}\left[f(x,y,z)\right]=\sum_{i}\omega_{i}^{y}\hat{f}(x,\tilde{y_{i}},z)
+\]
+
+\end_inset
+
+or 
+\begin_inset Formula 
+\[
+\hat{E}_{Z}\left[f(x,y,z)\right]=\sum_{j}\omega_{j}^{z}\hat{f}(x,y,\tilde{z_{j}})
+\]
+
+\end_inset
+
+this is very easily accomplished with RcppSimpleTensor -- just select the
+ right dimensions and recompute:
 \end_layout
 
 \begin_layout Standard
@@ -1503,9 +1774,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<one-only,par=TRUE,tidy=FALSE,echo=FALSE,fig.width=4,fig.height=4,out.width=0.45
-\backslash
-linewidth>>=
+<<one-only,echo=TRUE,tidy=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1526,12 +1795,6 @@ dim(Int.z)
 
 \begin_layout Plain Layout
 
-persp(x=xdata,y=int.y$nodes,z=Int.z,xlab="xdata",ylab="int.y$nodes",zlab="Value",th
-eta=300,phi=30)
-\end_layout
-
-\begin_layout Plain Layout
-
 # integrate w.r.t.
  y only  
 \end_layout
@@ -1539,6 +1802,42 @@ eta=300,phi=30)
 \begin_layout Plain Layout
 
 Int.y <- TI( Intdata[nx,ny,nz] * yweights[ny], nx + nz ) 
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(Int.y)
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can again inspect the result graphically:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<plot-last,par=TRUE,echo=FALSE,tidy=FALSE,fig.width=4,fig.height=4,out.width=0.45
+\backslash
+linewidth,cache=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+persp(x=xdata,y=int.y$nodes,z=Int.z,xlab="xdata",ylab="int.y$nodes",zlab="Value",th
+eta=300,phi=30)
 \end_layout
 
 \begin_layout Plain Layout

@@ -46,23 +46,32 @@ a.cos <- TI( cos(a[i,j,k],B[i,j]), k )
 
 # 3 dimensions x,y,z
 
-# select degree of splines
-degree <- 3
-# number of points in each dimension
+# integration setup: choose number of integration nodes and method
+library(statmod)
+num.int.z <- 50
+int.z <- gauss.quad(n=num.int.z,kind="hermite")
+ 
+num.int.y <- 40
+int.y <- gauss.quad(n=num.int.y,kind="hermite")
+
+# number of evaluation points in each dimension
 num.x <- 10
 num.y <- 8
 num.z <- 4
 
-# make knot vectors. we want to clamp the curve at ends of domain,
-# so we need "augmented" knot vectors
-xknots <- c(rep(0,times=degree),seq(0,10,le=num.x),rep(10,times=degree))
-yknots <- c(rep(0,times=degree),seq(0,10,le=num.y),rep(10,times=degree))
-zknots <- c(rep(0,times=degree),seq(0,50,le=num.z),rep(50,times=degree))
+# select degree of splines
+degree <- 3
 
-# select grid points where to evaluate the function
+# get spline knot vector defined on nodes
+xknots <- c(rep(0,times=degree),seq(0,10,le=num.x),rep(10,times=degree)) 
+zknots <- c(rep(min(int.z$nodes),times=degree),seq(int.z$nodes[1],int.z$nodes[num.int.z],le=num.z),rep(max(int.z$nodes),times=degree))
+yknots <- c(rep(min(int.y$nodes),times=degree),seq(int.y$nodes[1],int.y$nodes[num.int.y],le=num.y),rep(max(int.y$nodes),times=degree))
+
+# get grid points where to evaluate function
+
 xdata <- as.array(seq(0,10,length=length(xknots)-degree-1))
-ydata <- as.array(seq(0,10,length=length(yknots)-degree-1))
-zdata <- as.array(seq(0,50,length=length(zknots)-degree-1))
+ydata <- as.array(seq(int.y$nodes[1],int.y$nodes[num.int.y],length=length(yknots)-degree-1))
+zdata <- as.array(seq(int.z$nodes[1],int.z$nodes[num.int.z],length=length(zknots)-degree-1))
 
 # design matrices
 X <- splineDesign(knots=xknots,x=xdata)
@@ -112,9 +121,9 @@ bb <- array(b,dim=c(length(xdata),length(ydata),length(zdata)))
 ##### predict function at new, random values
 
 # new random data
-new_xdata <- sort(10 * runif( 20 ))    # some uniform(0,10) points
-new_ydata <- sort(10 * runif( 25 ))    # some uniform(0,10) points
-new_zdata <- sort(50*runif(19))
+new_xdata <- sort( runif(n=50,min=min(xdata),max=max(xdata)) )
+new_ydata <- sort( runif(n=55,min=min(int.y$nodes),max=max(int.y$nodes) ) )
+new_zdata <- sort( runif(n=31,min=min(int.z$nodes),max=max(int.z$nodes) ) )
 
 # basis for new values
 new_X <- splineDesign(knots=xknots,x=new_xdata)
@@ -133,37 +142,9 @@ sum(pred.vals - TIpred.vals)
 
 zind <- 1:length(new_zdata)
 # test by plotting at different values of Z
-persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,head(zind,1)],main=paste("approximated at z=",head(zind,1)),ticktype="detailed",xlab="rand_x",ylab="rand_y",zlab="approx",theta=300,phi=30)
-persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,tail(zind,1)],main=paste("approximated at z=",tail(zind,1)),ticktype="detailed",xlab="rand_x",ylab="rand_y",zlab="approx",theta=300,phi=30)
+persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,head(zind,1)],ticktype="detailed",xlab="new_x",ylab="new_y",zlab="approx",theta=300,phi=30)
+persp(x=new_xdata,y=new_ydata,z=pred.vals[ , ,tail(zind,1)],ticktype="detailed",xlab="new_x",ylab="new_y",zlab="approx",theta=300,phi=30)
 
-
-# take expectation w.r.t. z and y
-# -------------------------------
-
-library(statmod)
-num.z <- 50
-int.z <- gauss.quad(n=num.z,kind="hermite")
- 
-num.y <- 40
-int.y <- gauss.quad(n=num.y,kind="hermite")
-
-zknots <- c(rep(min(int.z$nodes),times=degree),seq(int.z$nodes[1],int.z$nodes[num.z],le=6),rep(max(int.z$nodes),times=degree))
-yknots <- c(rep(min(int.y$nodes),times=degree),seq(int.y$nodes[1],int.y$nodes[num.y],le=7),rep(max(int.y$nodes),times=degree))
-
-ydata <- as.array(seq(int.y$nodes[1],int.y$nodes[num.y],length=length(yknots)-degree-1))
-zdata <- as.array(seq(int.z$nodes[1],int.z$nodes[num.z],length=length(zknots)-degree-1))
-
-Z <- splineDesign(knots=zknots,x=zdata)
-Y <- splineDesign(knots=yknots,x=ydata)
-
-# redefine function for this scale
-RcppVals <- tensorFunction( R[i,j,k] ~ (X[i] + Y[j] - 0.5)^2 + (Z[k] - 0.5)^2 )
-# generate data
-RcppArray <- RcppVals(xdata,ydata,zdata)
-
-# calculate spline coeffs by solving system of equations exactly:
-b <- solve(kronecker(Z,kronecker(Y,X)), as.vector(RcppArray))
-bb <- array(b,dim=c(length(xdata),length(ydata),length(zdata)))
 
 # integrate w.r.t. z and y
 # ------------------------
