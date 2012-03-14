@@ -154,7 +154,7 @@ RcppSimpleTensorGetArgs <- function(a,r) {
       r$E = paste("((", r$E , ")?1.0:0.0)",sep="")
     }
 
-    if (paste(a[[1]]) %in% c('exp')) {
+    if (paste(a[[1]]) %in% c('exp','log','cos','sin','tan')) {
       r$E = paste(a[[1]],"(", r$E , ")",sep="")
     }
 
@@ -352,7 +352,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   for (i in c(indiceOut,indiceSum)) {
     # find where to get the size from 
     ddt = dd[dd$I==i,]
-    WRAPFUNC = paste(WRAPFUNC, i , " = dim(", ddt$M[1] ,")[", ddt$dim[1] ,"]" ,";",sep ="")  
+    WRAPFUNC = paste(WRAPFUNC, i , " = dim(as.array(", ddt$M[1] ,"))[", ddt$dim[1] ,"]" ,";",sep ="")  
   }
   # Calling the C function
   WRAPFUNC = paste(WRAPFUNC, "R = tmpfun(", paste(gsub('_$','',names(sig)),collapse=",") ,");",sep ="")  
