@@ -184,6 +184,15 @@ RcppSimpleTensor
  
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Usage
 \end_layout
@@ -874,6 +883,152 @@ TI( cos(A[i,j,k],B[i,j]), k )
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Under the hood
+\end_layout
+
+\begin_layout Standard
+In this section we'll present more about what is happening under the hood
+ of RcppSimpleTensor.
+ This is for user that want to understand better exactly what is going on
+ in this package.
+\end_layout
+
+\begin_layout Subsection
+Expression parsing and compilation
+\end_layout
+
+\begin_layout Standard
+TensorFunction and TI take the expression, extracts the relevant indices
+ and then generates a C++ file.
+ The C++ file is then compiled.
+ The source file and the compiled library are located in the .tensor folder
+ in the working directory.
+ You can go to that folder and see their content.
+ Additionally you also call the tensorFunction with the verbose argument,
+ this will display all of the compilation steps.
+\end_layout
+
+\begin_layout Standard
+After the compilation is done, the library is linked to the R environment
+ and wrapped into an R function that correctly deals with the different
+ dimensions.
+\end_layout
+
+\begin_layout Subsection
+Caching
+\end_layout
+
+\begin_layout Standard
+Obviously the compilation phase takes quite a long time and is unnecessary
+ if the tensor expression has not changed.
+ For that reason RcppSimpleTensor has a caching mechanism.
+ When tensorFunction is called a hash is created from the tensor expression.
+ This hash is used to create the c++ file and the library.
+ Before compiling the tensor, the function check if such a library already
+ exists locally and if it does, it links to it.
+\end_layout
+
+\begin_layout Standard
+You can see how faster the second call for a similar tensor is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<caching1,message=FALSE,tidy=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+library(RcppSimpleTensor)
+\end_layout
+
+\begin_layout Plain Layout
+
+# 1.
+ define tensor function, it will need to create the source and compile
+\end_layout
+
+\begin_layout Plain Layout
+
+system.time(tensFunc <- tensorFunction( R[k,j] ~ A[i,j,k] * b[i,n] ,cache=FALSE))
+\end_layout
+
+\begin_layout Plain Layout
+
+# 2.
+ call it again, it uses the cached library
+\end_layout
+
+\begin_layout Plain Layout
+
+system.time(tensFunc <- tensorFunction( R[k,j] ~ A[i,j,k] * b[i,n] ))
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This caching mechanism will also work for the TI() function.
+ However linking is itself slow compared to just a function call.
+ For that reason, to make TI() as fast as possible we use another a second
+ caching.
+ The TI context stores a list of all TI expressions.
+ When TI gets called, it looks in this list if the tensor called has already
+ been linked to the R context.
+ If that is the case, we don't want to load the library again, it's already
+ there.
+ 
+\end_layout
+
+\begin_layout Standard
+As a demo, we are going to make 3 calls to TI, the first one will require
+ compilation, the second one will require a linking, the third one will
+ use level-2 caching.
+ Let's compare the speeds:
+\end_layout
+
+\begin_layout Subsection
+Setting compiler flags for better performance
+\end_layout
+
+\begin_layout Standard
+By default your compiler flags won't have the -O3 flag which will give you
+ the best performance.
+ To activate that create a MakeVars file in your ~/.R/ directory and add
+ the following to it:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CXXFLAGS = -O3
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That will significantly increase the performances of your tensor expressions!
 \end_layout
 
 \begin_layout Section

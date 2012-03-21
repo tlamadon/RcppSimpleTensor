@@ -4,3 +4,5 @@ inst/tests/.tensor/*
 .Rapp.history
 .tensor/*
 Rprof.out
+**/.tensor/*
+inst/doc/.tensor
