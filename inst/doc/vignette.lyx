@@ -892,8 +892,8 @@ Under the hood
 \begin_layout Standard
 In this section we'll present more about what is happening under the hood
  of RcppSimpleTensor.
- This is for user that want to understand better exactly what is going on
- in this package.
+ This is for users that want to understand better what exactly is going
+ on in this package.
 \end_layout
 
 \begin_layout Subsection
@@ -901,13 +901,13 @@ Expression parsing and compilation
 \end_layout
 
 \begin_layout Standard
-TensorFunction and TI take the expression, extracts the relevant indices
+TensorFunction and TI take the expression, extract the relevant indices
  and then generates a C++ file.
  The C++ file is then compiled.
  The source file and the compiled library are located in the .tensor folder
  in the working directory.
  You can go to that folder and see their content.
- Additionally you also call the tensorFunction with the verbose argument,
+ Additionally, if you call the tensorFunction with the verbose argument,
  this will display all of the compilation steps.
 \end_layout
 
@@ -925,14 +925,14 @@ Caching
 Obviously the compilation phase takes quite a long time and is unnecessary
  if the tensor expression has not changed.
  For that reason RcppSimpleTensor has a caching mechanism.
- When tensorFunction is called a hash is created from the tensor expression.
- This hash is used to create the c++ file and the library.
- Before compiling the tensor, the function check if such a library already
+ When tensorFunction is called, a hash is created from the tensor expression.
+ This hash is used to create the C++ file and the library.
+ Before compiling the tensor, the function checks if such a library already
  exists locally and if it does, it links to it.
 \end_layout
 
 \begin_layout Standard
-You can see how faster the second call for a similar tensor is:
+You can see how much faster the second call for a similar tensor is:
 \end_layout
 
 \begin_layout Standard
@@ -984,8 +984,8 @@ system.time(tensFunc <- tensorFunction( R[k,j] ~ A[i,j,k] * b[i,n] ))
 \begin_layout Standard
 This caching mechanism will also work for the TI() function.
  However linking is itself slow compared to just a function call.
- For that reason, to make TI() as fast as possible we use another a second
- caching.
+ For that reason, to make TI() as fast as possible we use another caching
+ mechanism.
  The TI context stores a list of all TI expressions.
  When TI gets called, it looks in this list if the tensor called has already
  been linked to the R context.
