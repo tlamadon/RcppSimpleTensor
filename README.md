@@ -103,7 +103,7 @@ Suppose you have a function f defined on the tensor product of three linear spac
 
 If you have to evaluate f many times, for different sets of values stored in (x,y,z), say, then the following formulation is convenient:
 
-    Fillf <- tensorFunction( R[i,j,k] ~ pow(X[i] + Y[j] - 5,2) + pow(Z[k] - 15,0.5 ) );
+    Fillf <- tensorFunction( R[i,j,k] ~ (X[i] + Y[j] - 5)^2 + (Z[k] - 15)^0.5 );
 
 An alternative would be to use mapply:
 
@@ -118,7 +118,7 @@ An alternative would be to use mapply:
 RcppSimpleTensor also comes with a convenient inline formulation. Instead of declaring Fillf() in the example above before usage, we could also have written
 
     TI <- createInlineTensor()
-    TIarray <- TI( pow(x[i] + y[j] - 5,2) + pow(z[k] - 15,0.5 ), i+j+k)
+    TIarray <- TI( (x[i] + y[j] - 5)^2 + (z[k] - 15)^0.5, i+j+k)
     max(abs(TIarray - mapplyxyz))
 
 

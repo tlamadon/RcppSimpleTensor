@@ -18,11 +18,7 @@ NULL
 # for simulating time series for example
 
 # TODO: use of tensors inside formula (i,j)
-# TODO: return a scalar
 # TODO: use the shape of a tensor supplied as extra arguments for indexes
-# TODO: create inline tensor function
-# notation could be : 
-#   TI(expression ,  k+l|i+j       ) or
 #   TI(expression ,  shape=G[i,j,k])
 
 # I create a multidimensional array
