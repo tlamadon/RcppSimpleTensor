@@ -171,12 +171,12 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 }
 
 
-# Returns the list of current available compile C++ tensors 
+#' Returns the list of current available compiled C++ tensors 
 #
-# @keywords tensor cpp compile
-# @export
-# @examples
-# getTensorList()
+#' @keywords tensor cpp compile
+#' @export
+#' @examples
+#' getTensorList()
 getTensorList <- function() {
 
   env = parent.frame()
