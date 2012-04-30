@@ -187,7 +187,10 @@ getTensorList <- function() {
   tt = objects(envir = env, all.names = TRUE)
   for (oon in tt) {
     oo <- get(oon, envir = env)
-    if (class(oo) == 'tensorFunction') print(oo);
+    if (class(oo) == 'tensorFunction') {
+      cat(oon,': tensorFunction\n')
+      print(oo);
+    }
   }
 }
 
@@ -313,7 +316,11 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   # pasting all together!
   CODE = src;
   CODE = paste(CODE,src2)
-  CODE = paste(CODE,'Rcpp::NumericVector R(', Rsize, ');' ,"\n", sep="")
+  if (is.null(LHS$I)) {
+      CODE = paste(CODE,'double R;' ,"\n", sep="")
+  } else {
+      CODE = paste(CODE,'Rcpp::NumericVector R(', Rsize, ');' ,"\n", sep="")
+  }
   CODE = paste(CODE,srcloop)
   CODE = paste(CODE,"{\n")
   CODE = paste(CODE, LHS$E , " = " , LHS$E,"+ \\\n", sep="")
@@ -338,7 +345,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   #CODE = paste(CODE, RHS$E, ";\n" , sep="")
 
   CODE = paste(CODE,"}\n")
-  CODE = paste(CODE,"return R;\n")
+  CODE = paste(CODE,"return(wrap(R));\n")
   if (verbose) {
     #cat(CODE)
   }
@@ -365,7 +372,9 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   WRAPFUNC = paste(WRAPFUNC, "R = tmpfun(", paste(gsub('_$','',names(sig)),collapse=",") ,");",sep ="")  
   # Reshape the answer
   dd = LHS$D
-  WRAPFUNC = paste(WRAPFUNC, "dim(R) <- c(", paste(paste(dd$I[order(dd$dim)],sep=""),collapse=","),") ;",sep="")
+  if (!is.null(LHS$I)) {
+   WRAPFUNC = paste(WRAPFUNC, "dim(R) <- c(", paste(paste(dd$I[order(dd$dim)],sep=""),collapse=","),") ;",sep="")
+  }
   WRAPFUNC = paste(WRAPFUNC, "return(R)}" ,sep="")
 
   argnamelist = paste(gsub('_$','',names(reduceSig)),collapse=",")
@@ -416,7 +425,7 @@ print.cppTensor <- function(tensor) {
 
 # TODO: use only expression, not strings, and evaluate the subparts!!!!
 
-computeSig <- function(expr) {
+computeSig <- function(expr,dims) {
  # parse the expression usign substitute
   if (typeof(expr)=='language') {
     a = expr
@@ -424,8 +433,15 @@ computeSig <- function(expr) {
     a = as.formula(expr)
   } 
 
+  if (typeof(dims)=='language') {
+    b = dims
+  } else if (is.character(dims)) {
+    b = as.formula(dims)
+  } 
+
+
   # look if we already have this compiled localy
-  strexpr  =  deparse(a)
+  strexpr  =  paste(deparse(a),deparse(b))
   fhash    = digest(strexpr) 
   return(fhash)
 }
@@ -436,13 +452,8 @@ computeSig <- function(expr) {
 #' using the arrays available in the current scope
 #'
 #'
-#' @param argTensor tensor expression containing valid arrays, for example A[i,j]*B[j]
-#' @param argDims    the ordered list of the dimension of the return array, for example i+j+k
-#' @param name      readable name for faster look up (see vignette)
-#' @param shape     if shape can't be infered from argument (no implemented yet)
-#' @keywords tensor cpp compile inline
-#' @export
 #' @examples
+#' TI <- createInlineTensor()
 #' M = array(rnorm(9),dim=c(3,3))
 #' A = array(rnorm(3),dim=c(3))
 #' R = TI(M[i,j] * A[i],j) 
@@ -450,9 +461,9 @@ createInlineTensor <- function() {
 
  RCPP_TENSOR_LIST = list()
 
- TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
+ TI <- function(argTensor,argDims=0,name=NULL,shape=NULL) {
 
-    if (is.null(name)) name =  digest(substitute(argTensor)); 
+    if (is.null(name)) name =  paste(digest(substitute(argTensor)),digest(substitute(argDims))); 
     ltensor = RCPP_TENSOR_LIST[[name]] 
 
     if (!is.null(ltensor)) {
@@ -461,10 +472,14 @@ createInlineTensor <- function() {
 
       dims   = deparse(substitute(argDims))
       dims   = gsub('\\+',',',dims)
-     
+
       tsor   = deparse(substitute(argTensor))
-      TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
-   
+      if (dims!='0') {
+        TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
+      } else {
+        TENSOR = paste('R ~ ',tsor,sep='',collapse='')
+      }
+ 
       rr = createCppTensor(TENSOR,name=name)  
 
       if (is.null(name)) name=rr$name;
