@@ -116,6 +116,7 @@ An alternative would be to use mapply:
 
 RcppSimpleTensor also comes with a convenient inline formulation. Instead of declaring Fillf() in the example above before usage, we could also have written
 
+    TI <- createInlineTensor()
     TIarray <- TI( pow(x[i] + y[j] - 5,2) + pow(z[k] - 15,0.5 ), i+j+k)
     max(abs(TIarray - mapplyxyz))
 
@@ -129,5 +130,11 @@ Future developments
  - allow for time series formula such as `Y[n] ~ Y[n-1] + E[n]`
  - allow to use tensor within indexes such as `A[i] ~ B[ D[i] ]`
  - allow inverse redirections `A[D[i]] ~ B[i]`
+
+Related projects
+================
+
+ - [htensor](https://github.com/AlbertoRuiz/hTensor) in Haskell seems excellent
+ 
 
 

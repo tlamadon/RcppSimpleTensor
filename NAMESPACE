@@ -1,4 +1,4 @@
+export(createInlineTensor)
 export(tensorFunction)
-export(TI)
 import(digest)
 import(Rcpp)

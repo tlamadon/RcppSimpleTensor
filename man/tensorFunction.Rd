@@ -1,13 +1,13 @@
 \name{tensorFunction}
 \alias{tensorFunction}
 \title{This function generates another function that represents the tensor
-described in the only argument.}
+descirbed in the only argument.}
 \usage{
   tensorFunction(expr, name = NULL, cache = TRUE,
     verbose = FALSE)
 }
 \arguments{
-  \item{expr}{tensor expression. Return value of expression must be variable called "R".}
+  \item{expr}{tensor expression}
 
   \item{name}{name to be associated with the tensor. The
   name is used to store the binary file and the link to the
@@ -26,7 +26,7 @@ described in the only argument.}
 \description{
   The function interprets the tensor expression, generates
   C++ code for it, compiles the code, links the compiled
-  code, and returns an R function that wraps the C++
+  code, and returns a a R function that wraps the C++
   tensor
 }
 \examples{

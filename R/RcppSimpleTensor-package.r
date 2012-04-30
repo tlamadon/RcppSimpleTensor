@@ -182,7 +182,13 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 # @examples
 # getTensorList()
 getTensorList <- function() {
-  return(RCPP_OPTS$RCPP_TENSOR_LIST)
+
+  env = parent.frame()
+  tt = objects(envir = env, all.names = TRUE)
+  for (oon in tt) {
+    oo <- get(oon, envir = env)
+    if (class(oo) == 'tensorFunction') print(oo);
+  }
 }
 
 # creates the c fucntion from expression
@@ -210,12 +216,13 @@ getTensorList <- function() {
 #' matMult = tensorFunction(R[j] ~ M[i,j] * A[i]) 
 tensorFunction <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   rr = createCppTensor(expr=expr,name=name,cache=cache,verbose=verbose);
-  return(rr$wrapFunc);
+  tf <- rr$wrapFunc
+  class(tf) <- 'tensorFunction'
+  attr(tf,'cppTensor') <- rr
+  return(tf);
 }
 
-createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
-
-  #RCPP_TENSOR_LIST = NULL
+createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_LIST=list()) {
 
   # parse the expression usign substitute
   if (typeof(expr)=='language') {
@@ -228,7 +235,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   strexpr  =  deparse(a)
   fhash    = digest(strexpr) 
   if (is.null(name)) name = fhash;
-  filename = paste('rcpptensor_',fhash,sep="")
+  filename = paste('rcppTensor_',fhash,sep="")
 
   # if we already have the tensor in our local list and cache==TRUE, then just return it
   ltensor = RCPP_TENSOR_LIST[[name]]
@@ -285,13 +292,13 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   for (i in c(indiceOut,indiceSum)) {
     varn = i
     # get highest lag
-    lag = max(varframe$lag[varframe$I==varn])
+    lag = 0 #max(varframe$lag[varframe$I==varn])
 
     sig  = c(sig , "int")
     sign = c(sign, paste(varn,"_",sep=""))
     src = paste(src , 'int ' , varn , '_n = Rcpp::as<int> (', varn, '_);\n',sep="")
     src2 = paste(src2 , 'int ' , i , '_i;\n',sep="")
-    srcloop = paste(srcloop,'for (',i,'_i=',lag,'; ',i,'_i<',i,'_n; ',i,'_i++)\n',sep="")
+    srcloop = paste(srcloop,'for (',i,'_i=0','; ',i,'_i<',i,'_n; ',i,'_i++)\n',sep="")
   }
 
   names(sig) = sign;
@@ -380,7 +387,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   res$filename = filename
   res$name     = name
   res$argnamelist  = argnamelist
-  class(res) <- 'cpptensor'
+  class(res) <- 'cppTensor'
 
   # check if the hash is already in the list, if not add it!
   # not thread safe!!!!!
@@ -398,14 +405,31 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
 }
 
 
-print.cpptensor <- function(tensor) {  
+print.tensorFunction <- function(tensor) {  
+  print(attr(tensor,'cppTensor')) 
+}
+
+print.cppTensor <- function(tensor) {  
   cat('C++ tensor: ',tensor$str_expr,'\n')
   cat('    file  : ',tensor$filename,'\n\n')
 }
 
-
-# TODO: use substitute instead of terms
 # TODO: use only expression, not strings, and evaluate the subparts!!!!
+
+computeSig <- function(expr) {
+ # parse the expression usign substitute
+  if (typeof(expr)=='language') {
+    a = expr
+  } else if (is.character(expr)) {
+    a = as.formula(expr)
+  } 
+
+  # look if we already have this compiled localy
+  strexpr  =  deparse(a)
+  fhash    = digest(strexpr) 
+  return(fhash)
+}
+
 
 # ----- Roxygen Documentation
 #' This function directly evaluates the tensor expression
@@ -422,10 +446,15 @@ print.cpptensor <- function(tensor) {
 #' M = array(rnorm(9),dim=c(3,3))
 #' A = array(rnorm(3),dim=c(3))
 #' R = TI(M[i,j] * A[i],j) 
-TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
+createInlineTensor <- function() {
 
-    # checking if we have the tensor in the list
-    if (!is.null(name)) { ltensor = RCPP_TENSOR_LIST[[name]] } else {ltensor=NULL}
+ RCPP_TENSOR_LIST = list()
+
+ TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
+
+    if (is.null(name)) name =  digest(substitute(argTensor)); 
+    ltensor = RCPP_TENSOR_LIST[[name]] 
+
     if (!is.null(ltensor)) {
       rr = ltensor ;
     } else {
@@ -437,6 +466,14 @@ TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
       TENSOR = paste('R[',dims,'] ~ ',tsor,sep='',collapse='')
    
       rr = createCppTensor(TENSOR,name=name)  
+
+      if (is.null(name)) name=rr$name;
+
+      n = length(RCPP_TENSOR_LIST)
+      ns <- names(RCPP_TENSOR_LIST)
+      ns[[n+1]] <- name
+      RCPP_TENSOR_LIST[[n+1]] <<- rr
+      names(RCPP_TENSOR_LIST) <<- ns 
     }
 
     # get the list of arguments from parent environment
@@ -444,6 +481,15 @@ TI <- function(argTensor,argDims,name=NULL,shape=NULL) {
     res = do.call(rr$wrapFunc,argvals)
     
     return(res)
+ }
+
+ class(TI) <- 'inlineTensor'
+
+ return(TI)
+}
+
+print.inlineTensor <- function(TI) {
+   for (tt in environment(TI)$RCPP_TENSOR_LIST) print(tt);
 }
 
 
