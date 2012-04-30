@@ -50,10 +50,11 @@ Getting Started
 
 ### Installation
 
-Just download the package in a folder and install it in R. In the terminal:
+Use git to download the latest version of the package to your home git folder (or elsewhere), then install it in R:
 
-    wget https://github.com/downloads/tlamadon/RcppSimpleTensor/RcppSimpleTensor_0.2.tar.gz
-    R CMD INSTALL RcppSimpleTensor_0.2.tar.gz
+    cd ~/git
+    git clone git://github.com/tlamadon/RcppSimpleTensor.git
+    R CMD INSTALL RcppSimpleTensor
 
 then in R you just need to include the library
 
