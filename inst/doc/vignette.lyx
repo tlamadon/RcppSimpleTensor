@@ -578,7 +578,12 @@ y
 
 \begin_layout Plain Layout
 
-# or define the tensor inline with TI()
+# or create the inline tensor
+\end_layout
+
+\begin_layout Plain Layout
+
+TI <- createInlineTensor()
 \end_layout
 
 \begin_layout Plain Layout
@@ -999,6 +1004,45 @@ As a demo, we are going to make 3 calls to TI, the first one will require
  compilation, the second one will require a linking, the third one will
  use level-2 caching.
  Let's compare the speeds:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<caching2,message=FALSE,tidy=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+# first call
+\end_layout
+
+\begin_layout Plain Layout
+
+system.time(TI(A[i,j,k] * b[i,n],j+k))
+\end_layout
+
+\begin_layout Plain Layout
+
+# second call
+\end_layout
+
+\begin_layout Plain Layout
+
+system.time(TI(A[i,j,k] * b[i,n],j+k))
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
