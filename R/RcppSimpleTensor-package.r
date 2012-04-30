@@ -409,7 +409,13 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   return(res)
 }
 
-
+# ----- Roxygen Documentation
+#' Function to print content of a tensorFunction 
+#' 
+#' @param tensor tensor to print 
+#' source code
+#' @keywords tensor cpp compile
+#' @export
 print.tensorFunction <- function(tensor) {  
   print(attr(tensor,'cppTensor')) 
 }
