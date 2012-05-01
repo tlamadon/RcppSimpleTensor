@@ -1,3 +1,4 @@
+export(createInlineTensor)
 export(getTensorList)
 export(print.tensorFunction)
 export(tensorFunction)

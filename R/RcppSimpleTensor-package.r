@@ -454,6 +454,7 @@ computeSig <- function(expr,dims) {
 #' using the arrays available in the current scope
 #'
 #'
+#' @export
 #' @examples
 #' TI <- createInlineTensor()
 #' M = array(rnorm(9),dim=c(3,3))
