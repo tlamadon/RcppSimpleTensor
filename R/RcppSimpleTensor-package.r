@@ -237,8 +237,8 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   filename = paste('rcppTensor_',fhash,sep="")
 
   # if we already have the tensor in our local list and cache==TRUE, then just return it
-  ltensor = RCPP_TENSOR_LIST[[name]]
-  if (!is.null(ltensor) & cache==TRUE) return(ltensor);
+  #ltensor = RCPP_TENSOR_LIST[[name]]
+  #if (!is.null(ltensor) & cache==TRUE) return(ltensor);
 
   # otherwise we have to go to work!
   if (a[[1]] != '~') {
@@ -464,12 +464,13 @@ createInlineTensor <- function() {
 
  RCPP_TENSOR_LIST = list()
 
- TI <- function(argTensor,argDims=0,name=NULL,shape=NULL) {
+ TI <- function(argTensor,argDims=0,name=NULL,shape=NULL,verbose=FALSE) {
 
     if (is.null(name)) name =  paste(digest(substitute(argTensor)),digest(substitute(argDims))); 
     ltensor = RCPP_TENSOR_LIST[[name]] 
 
     if (!is.null(ltensor)) {
+      if (verbose) cat('tensor found in L2 cache\n')
       rr = ltensor ;
     } else {
 
@@ -506,6 +507,12 @@ createInlineTensor <- function() {
  return(TI)
 }
 
+
+
+# ----- Roxygen Documentation
+#' Prints the content of the inline tensor. Basically all c++ compiled tensors used by TI. 
+#'
+#' @export
 print.inlineTensor <- function(TI) {
    for (tt in environment(TI)$RCPP_TENSOR_LIST) print(tt);
 }
