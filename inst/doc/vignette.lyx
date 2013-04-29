@@ -117,39 +117,23 @@ status open
 
 \begin_layout Plain Layout
 
+<<setup,echo=FALSE,results='hide',message=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+knit_hooks$set(par=function(before,options,envir){if (before) par(mar=c(4,4,.1,.1)
+,cex.lab=1,cex.axis=1,mgp=c(2,.7,0),tcl=-0.3,las=1)},crop=hook_pdfcrop)
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(fig.path='lyx-figures/',fig.align='center',fig.show='hold',out.width=
+'.49
+\backslash
 
 \backslash
-SweaveOpts{fig.path=figure/,fig.align=center,fig.show=hold}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-<<setup,echo=FALSE,results=hide,message=FALSE>>=
-\end_layout
-
-\begin_layout Plain Layout
-
-options(replace.assign=TRUE)
-\end_layout
-
-\begin_layout Plain Layout
-
-knit_hooks$set(par=function(before, options, envir){if (before) par(mar=c(4,4,.1,.
-1),cex.lab=.95,cex.axis=.9,mgp=c(2,.7,0),tcl=-.3,las=1)})
-\end_layout
-
-\begin_layout Plain Layout
-
-library(ggplot2)
+linewidth',tidy=TRUE)
 \end_layout
 
 \begin_layout Plain Layout
@@ -951,11 +935,6 @@ status open
 
 \begin_layout Plain Layout
 
-library(RcppSimpleTensor)
-\end_layout
-
-\begin_layout Plain Layout
-
 # 1.
  define tensor function, it will need to create the source and compile
 \end_layout
@@ -1495,9 +1474,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<plotfun,par=TRUE,tidy=FALSE,echo=FALSE,fig.width=4,fig.height=4,out.width=0.45
-\backslash
-linewidth,cache=FALSE>>=
+<<plotfun,par=TRUE,echo=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1765,9 +1742,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<plot-new,par=TRUE,tidy=FALSE,echo=FALSE,fig.width=4,fig.height=4,out.width=0.45
-\backslash
-linewidth,cache=FALSE>>=
+<<plot-new,par=TRUE,echo=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1844,9 +1819,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<get-intdata,par=TRUE,tidy=FALSE,fig.width=4,fig.height=4,out.width=0.5
-\backslash
-linewidth,cache=FALSE>>=
+<<get-intdata,par=TRUE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2028,9 +2001,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<plot-last,par=TRUE,echo=FALSE,tidy=FALSE,fig.width=4,fig.height=4,out.width=0.45
-\backslash
-linewidth,cache=FALSE>>=
+<<plot-last,par=TRUE,echo=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
