@@ -1,7 +1,5 @@
 export(createInlineTensor)
 export(getTensorList)
-export(print.inlineTensor)
-export(print.tensorFunction)
 export(tensorFunction)
-import(digest)
 import(Rcpp)
+import(digest)

@@ -13,6 +13,9 @@ Depends:
     Rcpp (>= 0.9.3),
     inline (>= 0.3.8),
     digest (>= 0.5.1)
+Suggests:
+    knitr
 LazyLoad: yes
+VignetteBuilder: knitr
 Collate:
     'RcppSimpleTensor-package.r'

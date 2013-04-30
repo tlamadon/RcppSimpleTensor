@@ -2,10 +2,10 @@
 \alias{print.tensorFunction}
 \title{Function to print content of a tensorFunction}
 \usage{
-  print.tensorFunction(tensor)
+  \method{print}{tensorFunction} (tensor)
 }
 \arguments{
-  \item{tensor}{tensor to print source code}
+  \item{tensor}{tensor to print}
 }
 \description{
   Function to print content of a tensorFunction

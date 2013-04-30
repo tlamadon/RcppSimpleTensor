@@ -8,6 +8,8 @@
 \usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{matrix}
+
+%\VignetteEngine{knitr}
 \end_preamble
 \use_default_options true
 \begin_modules

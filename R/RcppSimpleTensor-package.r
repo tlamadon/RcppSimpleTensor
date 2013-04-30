@@ -192,7 +192,6 @@ getTensorList <- function() {
 
 # creates the c fucntion from expression
 
-# ----- Roxygen Documentation
 #' This function generates another function that represents the tensor
 #' descirbed in the only argument.
 #'
@@ -413,13 +412,18 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
 #' Function to print content of a tensorFunction 
 #' 
 #' @param tensor tensor to print 
-#' source code
 #' @keywords tensor cpp compile
-#' @export
+#' @method print tensorFunction
 print.tensorFunction <- function(tensor) {  
   print(attr(tensor,'cppTensor')) 
 }
 
+# ----- Roxygen Documentation
+#' Function to print content of a cppTensor 
+#' 
+#' @param tensor tensor to print 
+#' @keywords tensor cpp compile
+#' @method print cppTensor
 print.cppTensor <- function(tensor) {  
   cat('C++ tensor: ',tensor$str_expr,'\n')
   cat('    file  : ',tensor$filename,'\n\n')
@@ -512,7 +516,8 @@ createInlineTensor <- function() {
 # ----- Roxygen Documentation
 #' Prints the content of the inline tensor. Basically all c++ compiled tensors used by TI. 
 #'
-#' @export
+#' @param TI inline tensor to print
+#' @method print inlineTensor
 print.inlineTensor <- function(TI) {
    for (tt in environment(TI)$RCPP_TENSOR_LIST) print(tt);
 }
