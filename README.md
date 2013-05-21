@@ -56,6 +56,11 @@ Use git to download the latest version of the package to your home git folder (o
     git clone git://github.com/tlamadon/RcppSimpleTensor.git
     R CMD INSTALL RcppSimpleTensor
 
+alternatively, if you have the [devtools](https://github.com/hadley/devtools) library (or if you install it with `install.pacakges('devtools')`), you can use `install_github`
+
+    library(devtools)
+    install_github('RcppSimpleTensor','tlamadon')
+
 then in R you just need to include the library
 
     library(RcppSimpleTensor)
