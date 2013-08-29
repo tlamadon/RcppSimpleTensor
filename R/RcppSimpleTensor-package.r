@@ -318,7 +318,7 @@ createCppTensor <- function(expr,name=NULL,cache=TRUE,verbose=FALSE,RCPP_TENSOR_
   }
   CODE = paste(CODE,srcloop)
   CODE = paste(CODE,"{\n")
-  CODE = paste(CODE, LHS$E , " = " , LHS$E,"+ \\\n", sep="")
+  CODE = paste(CODE, LHS$E , " = " , LHS$E, " + \\\n ", sep="")
   
   # we need to break the line, let's do it every 60 charaters
   # but we need to break on a blank space!
@@ -573,7 +573,7 @@ rsp_cxxfunction <- function (sig = character(), body = character(), plugin = "de
     }
     LinkingTo <- settings$LinkingTo
     if (!is.null(LinkingTo)) {
-        paths <- .find.package(LinkingTo, quiet = TRUE)
+        paths <- find.package(LinkingTo, quiet = TRUE)
         if (length(paths)) {
             flag <- paste(inline:::paste0("-I\"", paths, "/include\""), 
                 collapse = " ")
