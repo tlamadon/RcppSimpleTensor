@@ -6,3 +6,4 @@ inst/tests/.tensor/*
 Rprof.out
 **/.tensor/*
 inst/doc/.tensor
+.Rproj.user

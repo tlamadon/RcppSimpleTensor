@@ -21,11 +21,6 @@ NULL
 # TODO: use the shape of a tensor supplied as extra arguments for indexes
 #   TI(expression ,  shape=G[i,j,k])
 
-# I create a multidimensional array
-require(Rcpp)
-require(inline)
-require(digest)
-
 # check out ?methods to overload $
 
 # this will store the list of currently
