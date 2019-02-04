@@ -1,8 +1,8 @@
 Package: RcppSimpleTensor
 Type: Package
 Title: A package to readily write fast tensor expressions
-Version: 0.2
-Date: 2011-05-13
+Version: 0.3
+Date: 2019-02-04
 Author: Thibaut Lamadon
 Maintainer: Thibaut Lamadon <thibaut.lamadon@gmail.com>, Florian Oswald
     <florian.oswald@gmail.com>
