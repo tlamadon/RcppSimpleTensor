@@ -20,3 +20,4 @@ LazyLoad: yes
 VignetteBuilder: knitr
 Collate:
     'RcppSimpleTensor-package.r'
+RoxygenNote: 6.1.1
