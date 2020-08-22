@@ -1,5 +1,4 @@
 Makefile
-.tensor
 inst/doc/vignette.lyx
 ^.*\.Rproj$
 ^\.Rproj\.user$
