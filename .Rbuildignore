@@ -1,4 +1,0 @@
-Makefile
-inst/doc/vignette.lyx
-^.*\.Rproj$
-^\.Rproj\.user$
