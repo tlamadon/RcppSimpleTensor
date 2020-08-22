@@ -19,5 +19,5 @@ Suggests:
 LazyLoad: yes
 VignetteBuilder: knitr
 Collate:
-    'RcppSimpleTensor-package.r'
-RoxygenNote: 6.1.1
+    'RcppSimpleTensor.R'
+RoxygenNote: 7.1.1

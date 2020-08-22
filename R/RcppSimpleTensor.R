@@ -170,8 +170,6 @@ RcppSimpleTensorGetArgs <- function(a,r) {
 #
 #' @keywords tensor cpp compile
 #' @export
-#' @examples
-#' getTensorList()
 getTensorList <- function() {
 
   env = parent.frame()
@@ -205,8 +203,6 @@ getTensorList <- function() {
 #' source code
 #' @keywords tensor cpp compile
 #' @export
-#' @examples
-#' matMult = tensorFunction(R[j] ~ M[i,j] * A[i]) 
 tensorFunction <- function(expr,name=NULL,cache=TRUE,verbose=FALSE) {
   rr = createCppTensor(expr=expr,name=name,cache=cache,verbose=verbose);
   tf <- rr$wrapFunc
@@ -452,13 +448,7 @@ computeSig <- function(expr,dims) {
 #' This function directly evaluates the tensor expression
 #' using the arrays available in the current scope
 #'
-#'
 #' @export
-#' @examples
-#' TI <- createInlineTensor()
-#' M = array(rnorm(9),dim=c(3,3))
-#' A = array(rnorm(3),dim=c(3))
-#' R = TI(M[i,j] * A[i],j) 
 createInlineTensor <- function() {
 
  RCPP_TENSOR_LIST = list()
