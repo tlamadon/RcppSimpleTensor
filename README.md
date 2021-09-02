@@ -60,7 +60,7 @@ alternatively, if you have the [devtools](https://github.com/hadley/devtools) li
 you can do the following from the R command line:
 
     library(devtools)
-    install_github('RcppSimpleTensor','tlamadon')
+    install_github('tlamadon/RcppSimpleTensor')
 
 then in R you just need to include the library
 
